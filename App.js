@@ -11,6 +11,7 @@ import { store } from "./src/reduxToolkit/store";
 import Login from "./src/Screens/Login";
 import OTPVerification from "./src/Screens/OTPVerification";
 import PhoneNumber from "./src/Screens/PhoneNubmer";
+import DashboardNavigator from "./src/navigation/DashboardNavigator";
 
 export default function App() {
   const [fontsLoaded, fontError] = Font.useFonts({
@@ -35,6 +36,8 @@ export default function App() {
         <OTPVerification />
         {/* <PhoneNumber /> */}
         <StatusBar style="auto" />
+        <DashboardNavigator />
+        <StatusBar style="auto" backgroundColor="#fff" />
       </View>
     </Provider>
   );
