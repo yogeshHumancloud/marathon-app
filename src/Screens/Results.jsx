@@ -3,8 +3,6 @@ import {
   Text,
   View,
   TextInput,
-  TouchableOpacity,
-  ScrollView,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";

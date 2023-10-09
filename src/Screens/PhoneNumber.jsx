@@ -1,72 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, StyleSheet, Alert, TextInput } from "react-native";
-import { Input } from "react-native-elements";
-import { LinearGradient } from "expo-linear-gradient";
-// import Button from "../components/common/BackButton";
-import { Icon } from "react-native-paper";
+import { AntDesign } from "@expo/vector-icons";
+
 import { TouchableOpacity } from "react-native";
-import BackButton from "../components/common/BackButton";
 import Button from "../components/common/Button";
 import Toast from "react-native-toast-message";
 import { sendOTP } from "../api";
 
-const PhoneNumber = ({ onVerify, navigation }) => {
-  const [otp, setOTP] = useState(["", "", "", "", "", ""]);
-  const inputRefs = useRef([]);
-
+const PhoneNumber = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const [text, setText] = React.useState("");
-  useEffect(() => {
-    if (inputRefs.current[0]) {
-      inputRefs.current[0].focus();
-    }
-  }, []);
 
-  const handleVerify = () => {
-    const formattedOTP = otp.join("");
-    if (formattedOTP.length === 6) {
-      onVerify(formattedOTP);
-    } else {
-      Alert.alert("Invalid OTP", "Please enter a valid 6-digit OTP.");
-    }
-  };
-
-  const handleOTPChange = (text, index) => {
-    if (text.length <= 1) {
-      const updatedOTP = [...otp];
-      updatedOTP[index] = text;
-      setOTP(updatedOTP);
-      if (text === "" && index > 0) {
-        // If the current input is empty and it's not the first input, move to the previous input
-        inputRefs.current[index - 1].focus();
-      }
-
-      if (text.length === 1 && index < 5) {
-        inputRefs.current[index + 1].focus(); // Move to the next input
-      } else if (text.length === 0 && index > 0) {
-        inputRefs.current[index - 1].focus(); // Move to the previous input
-      }
-    }
-  };
-  const handleKeyPress = (e, index) => {
-    console.log("press button");
-    if (e.nativeEvent.key === "Backspace" && index > 0 && otp[index] === "") {
-      //   setTimeout(() => {
-      inputRefs.current[index - 1].focus();
-      //   }, 0);
-    }
-    if (otp[index] !== "") {
-      console.log("input field not blank", e.nativeEvent.key);
-      const updatedOTP = [...otp];
-      updatedOTP[index] = e.nativeEvent.key;
-      setOTP(updatedOTP);
-      console.log(updatedOTP, "updatedopt");
-      if (index < 5 && e.nativeEvent.key !== "Backspace") {
-        inputRefs.current[index + 1].focus();
-      }
-    }
-  };
   const handleLogin = async () => {
     if (text.length === 10) {
       try {
@@ -106,10 +51,14 @@ const PhoneNumber = ({ onVerify, navigation }) => {
 
   return (
     <View style={styles.mainContainer}>
-      {/* <TouchableOpacity style={styles.backButton}>
-        <Text>Back</Text>
-      </TouchableOpacity> */}
-      <BackButton />
+      <TouchableOpacity
+        onPress={() => {
+          console.log("back");
+        }}
+        style={styles.backButton}
+      >
+        <AntDesign name="arrowleft" size={24} color="black" />
+      </TouchableOpacity>
       <Text style={styles.title}>Enter Phone Number</Text>
 
       <Text style={styles.subtext}>
@@ -138,10 +87,6 @@ const PhoneNumber = ({ onVerify, navigation }) => {
             maxLength={10}
           />
         </View>
-        <LinearGradient
-          colors={["#4c669f", "#3b5998", "#192f6a"]}
-          style={styles.buttonContainer}
-        ></LinearGradient>
       </View>
       <Button
         color={"#0064AD"}
@@ -167,13 +112,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   backButton: {
-    fontSize: 20,
-    borderColor: "#000",
-    borderWidth: 1,
-    borderRadius: 5,
-    alignSelf: "flex-start",
-
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
   },
   phoneContainer: {
     fontSize: 20,
@@ -205,42 +144,16 @@ const styles = StyleSheet.create({
   subtext: {
     fontSize: 16,
     fontWeight: "400",
-    // fontFamily: "Open Sans",
     paddingLeft: 5,
     paddingRight: 5,
     color: "#666",
   },
-  otpContainer: {
-    flexDirection: "row",
-    marginBottom: 20,
-    marginTop: 6,
-  },
+
   phoneHeader: {
     marginLeft: 7,
     fontSize: 14,
     color: "#333",
     fontWeight: "400",
-  },
-  input: {
-    width: 40,
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginRight: 10,
-    textAlign: "center",
-    fontSize: 20,
-    marginTop: 200,
-  },
-  buttonContainer: {
-    width: "100%",
-    borderRadius: 10,
-    backgroundColor: "blue",
-  },
-  button: {
-    borderRadius: 10,
-    backgroundColor: "blue",
   },
 });
 

@@ -1,15 +1,6 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-} from "react-native";
+import { StyleSheet, View, TextInput, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { ImagesSource } from "../assets/images/images";
 import Card from "../components/common/Card";
 import { getEventBibs } from "../api";
 

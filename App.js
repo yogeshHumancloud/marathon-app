@@ -1,21 +1,13 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, ImageBackground, Text } from "react-native";
-
+import { StyleSheet, View } from "react-native";
 import * as Font from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { ImagesSource } from "./src/assets/images/images";
 import { useCallback } from "react";
-import Button from "./src/components/common/Button";
 import { Provider } from "react-redux";
 import { persistor, store } from "./src/reduxToolkit/store";
-import Login from "./src/Screens/Login";
-import OTPVerification from "./src/Screens/OTPVerification";
-import PhoneNumber from "./src/Screens/PhoneNumber";
-import DashboardNavigator from "./src/navigation/DashboardNavigator";
 import Toast from "react-native-toast-message";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { PersistGate } from "redux-persist/integration/react";
-import { persistStore } from "redux-persist";
 
 export default function App() {
   const [fontsLoaded, fontError] = Font.useFonts({

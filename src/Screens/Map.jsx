@@ -15,11 +15,14 @@ import MapView, {
 } from "react-native-maps";
 import axios from "axios";
 import { getEventData } from "../api";
+import Button from "../components/common/Button";
+import { useDispatch } from "react-redux";
+import { deleteUser } from "../reduxToolkit/user/userSlice";
 
 const Map = () => {
   const [loading, setLoading] = useState(true);
   const polylineref = useRef(null);
-
+  const dispatch = useDispatch();
   const [categories, setCategories] = useState([]);
   const [route, setRoute] = useState([]);
 
@@ -97,6 +100,11 @@ const Map = () => {
         paddingTop: 24,
       }}
     >
+      <Button
+        label={"loguot"}
+        onPress={() => dispatch(deleteUser())}
+        width={50}
+      />
       <View
         style={{
           width: "100%",
