@@ -7,9 +7,15 @@ import { Icon } from "react-native-paper";
 import { TouchableOpacity } from "react-native";
 import BackButton from "../components/common/BackButton";
 import Button from "../components/common/Button";
-const PhoneNumber = ({ onVerify }) => {
+import Toast from "react-native-toast-message";
+import { sendOTP } from "../api";
+
+const PhoneNumber = ({ onVerify, navigation }) => {
   const [otp, setOTP] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef([]);
+
+  const [loading, setLoading] = useState(false);
+
   const [text, setText] = React.useState("");
   useEffect(() => {
     if (inputRefs.current[0]) {
@@ -61,9 +67,43 @@ const PhoneNumber = ({ onVerify }) => {
       }
     }
   };
-  const handleLogin = () => {
-    console.log("hello login");
+  const handleLogin = async () => {
+    if (text.length === 10) {
+      try {
+        setLoading(true);
+        const response = await sendOTP({ mobile_number: text });
+
+        if (response.response.status === "success") {
+          setLoading(false);
+          navigation.navigate("otpverify", {
+            mobile_number: text,
+          });
+        } else {
+          setLoading(false);
+          Toast.show({
+            type: "error",
+            text1: "Some error occured, please try again",
+            position: "bottom",
+          });
+        }
+      } catch (e) {
+        console.log(e);
+        setLoading(false);
+        Toast.show({
+          type: "error",
+          text1: "Some error occured, please try again",
+          position: "bottom",
+        });
+      }
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Please enter valid mobile number",
+        position: "bottom",
+      });
+    }
   };
+
   return (
     <View style={styles.mainContainer}>
       {/* <TouchableOpacity style={styles.backButton}>
@@ -103,7 +143,12 @@ const PhoneNumber = ({ onVerify }) => {
           style={styles.buttonContainer}
         ></LinearGradient>
       </View>
-      <Button color={"#0064AD"} label="Continue" onPress={handleLogin} />
+      <Button
+        color={"#0064AD"}
+        label="Continue"
+        onPress={handleLogin}
+        isLoading={loading}
+      />
     </View>
   );
 };
@@ -119,6 +164,7 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     paddingRight: 16,
     paddingBottom: 12,
+    backgroundColor: "#fff",
   },
   backButton: {
     fontSize: 20,

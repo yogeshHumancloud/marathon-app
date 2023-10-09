@@ -10,7 +10,7 @@ const getToken = async (isRefreshToken) => {
 
     if (jsonValue !== null) {
       // const user = JSON.parse(jsonValue.userData);
-      const user = jsonValue;
+      const user = jsonValue.user;
 
       if (isRefreshToken && user?.tokens?.refresh?.token) {
         return { token: user?.tokens?.refresh?.token, user };
@@ -54,6 +54,29 @@ export const login = async (body) => {
   return new Promise(async (resolve, reject) => {
     try {
       const response = await client.post("v1/auth/login/", body);
+      resolve(response.data);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+export const sendOTP = async (body) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await client.post("v1/auth/send-otp-sms/", body);
+      resolve(response.data);
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
+  });
+};
+
+export const verifyOTP = async (body) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await client.post("v1/auth/verify-otp-sms/", body);
       resolve(response.data);
     } catch (error) {
       reject(error);
@@ -110,6 +133,7 @@ export const getEventBibs = async (body) => {
 
 export const getRefreshToken = async () => {
   const refreshToken = await getToken(true);
+  console.log(refreshToken);
   return new Promise(async (resolve, reject) => {
     try {
       const response = await client.post("v1/auth/refresh-tokens", {
@@ -124,7 +148,7 @@ export const getRefreshToken = async () => {
     } catch (error) {
       console.log(error);
       store.dispatch({
-        type: "logoutUser",
+        type: "deleteUser",
       });
       reject(error?.response?.data || error);
     }
@@ -163,8 +187,9 @@ client.interceptors.response.use(
       if (status === 401) {
         originalConfig._retry = true;
         try {
-          await getRefreshToken();
-          console.log(originalConfig.headers.Authorization);
+          if (originalConfig.headers.Authorization) {
+            await getRefreshToken();
+          }
           return client(originalConfig);
         } catch (_error) {
           return Promise.reject(_error);

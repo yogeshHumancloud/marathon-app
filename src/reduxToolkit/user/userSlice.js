@@ -1,27 +1,29 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = {
-  user: {
-    role: "user",
-    isEmailVerified: false,
-    activity: [],
-    events: [],
-    mobile_number: "9325834829",
-    id: "651d0ba951c73a512d49ac5b",
-  },
-  tokens: {
-    access: {
-      token:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NTFkMGJhOTUxYzczYTUxMmQ0OWFjNWIiLCJpYXQiOjE2OTY1ODQ0MDYsImV4cCI6MTY5NjY3MDgwNiwidHlwZSI6ImFjY2VzcyJ9.0gSqrlcgE7MKRVufsfIt92ISML893P_ti7AYRLQ_G80",
-      expires: "2023-10-07T09:26:46.450Z",
-    },
-    refresh: {
-      token:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NTFkMGJhOTUxYzczYTUxMmQ0OWFjNWIiLCJpYXQiOjE2OTY1ODQ0MDYsImV4cCI6MTY5OTE3NjQwNiwidHlwZSI6InJlZnJlc2gifQ.fuzGD34x84WkZcBN6ELl71f4qoSrnYoeN5HUI1oT7kA",
-      expires: "2023-11-05T09:26:46.451Z",
-    },
-  },
-};
+// const initialState = {
+//   user: {
+//     role: "user",
+//     isEmailVerified: false,
+//     activity: [],
+//     events: [],
+//     mobile_number: "9325834829",
+//     id: "651d0ba951c73a512d49ac5b",
+//   },
+//   tokens: {
+//     access: {
+//       token:
+//         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NTFkMGJhOTUxYzczYTUxMmQ0OWFjNWIiLCJpYXQiOjE2OTY4MzA4NzQsImV4cCI6MTY5NjkxNzI3NCwidHlwZSI6ImFjY2VzcyJ9.ozzCIb8DtSxAuFV6dWw8a_lJv8U6dfuWGbsUUjE0u00",
+//       expires: "2023-10-10T05:54:34.586Z",
+//     },
+//     refresh: {
+//       token:
+//         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NTFkMGJhOTUxYzczYTUxMmQ0OWFjNWIiLCJpYXQiOjE2OTY4MzA4NzQsImV4cCI6MTY5OTQyMjg3NCwidHlwZSI6InJlZnJlc2gifQ.AFjsYEUTMdXPIiJkTA4w4CkENfV2ouOSBGNCF8r2yxk",
+//       expires: "2023-11-08T05:54:34.587Z",
+//     },
+//   },
+// };
+
+const initialState = { user: null };
 
 export const userSlice = createSlice({
   name: "user",

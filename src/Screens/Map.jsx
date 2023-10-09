@@ -4,6 +4,7 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -160,7 +161,7 @@ const Map = () => {
         ))}
       </View>
       <View style={{ marginVertical: 24, flex: 1, overflow: "hidden" }}>
-        {loading && <Text>Loading...</Text>}
+        {/* {loading && <Text>Loading...</Text>} */}
         <MapView
           mapType="none"
           provider={PROVIDER_DEFAULT}
@@ -204,6 +205,20 @@ const Map = () => {
             strokeWidth={3}
           />
         </MapView>
+        {loading && (
+          <View
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              backgroundColor: "#0064AD1A",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <ActivityIndicator size="large" color="#000" />
+          </View>
+        )}
       </View>
     </View>
   );

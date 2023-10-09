@@ -5,17 +5,25 @@ import { LinearGradient } from "expo-linear-gradient";
 import BackButton from "../components/common/BackButton";
 import Button from "../components/common/Button";
 import { TouchableOpacity } from "react-native";
+import { sendOTP, verifyOTP } from "../api";
+import Toast from "react-native-toast-message";
+import { useDispatch } from "react-redux";
+import { setUser } from "../reduxToolkit/user/userSlice";
 
-const OTPVerification = ({ onVerify }) => {
+const OTPVerification = ({ onVerify, navigation, route }) => {
   const [otp, setOTP] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef([]);
+  const [loading, setLoading] = useState(false);
   const [text, setText] = React.useState("");
   const [otpLength, setotpLenght] = React.useState(0);
+  const dispatch = useDispatch();
   useEffect(() => {
     if (inputRefs.current[0]) {
       inputRefs.current[0].focus();
     }
+    console.log(route);
   }, []);
+
   useEffect(() => {
     console.log("OTP", otp.length);
     let lenght = 0;
@@ -82,12 +90,66 @@ const OTPVerification = ({ onVerify }) => {
   const handleLogin = () => {
     console.log("hello login");
   };
-  handleResendOtp = () => {
-    console.log("Resend OTP Has been successfully");
+  handleResendOtp = async () => {
+    try {
+      const response = await sendOTP({
+        mobile_number: route.params.mobile_number,
+      });
+
+      if (response.response.status === "success") {
+        // navigation.navigate("otpverify", {
+        //   mobile_number: text,
+        // });
+        Toast.show({
+          type: "success",
+          text1: "OTP sent successfully",
+          position: "bottom",
+        });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Some error occured, please try again",
+          position: "bottom",
+        });
+      }
+    } catch (e) {
+      console.log(e);
+      Toast.show({
+        type: "error",
+        text1: "Some error occured, please try again",
+        position: "bottom",
+      });
+    }
   };
 
-  const handleVerifys = () => {};
-  console.log("Verifying opt successfully");
+  const handleVerifys = async () => {
+    try {
+      setLoading(true);
+      const response = await verifyOTP({
+        mobile_number: route.params.mobile_number,
+        otp: otp?.join(""),
+      });
+      if (response.tokens) {
+        dispatch(setUser(response));
+      } else {
+        setLoading(false);
+        Toast.show({
+          type: "error",
+          text1: "Some error occured, please try again",
+          position: "bottom",
+        });
+      }
+    } catch (e) {
+      console.log(e);
+      setLoading(false);
+      Toast.show({
+        type: "error",
+        text1: "Some error occured, please try again",
+        position: "bottom",
+      });
+    }
+  };
+
   return (
     <View style={styles.mainContainer}>
       {/* <TouchableOpacity style={styles.backButton}>
@@ -133,6 +195,7 @@ const OTPVerification = ({ onVerify }) => {
       </View>
       <Button
         isDisabled={otpLength !== 6 ? true : false}
+        isLoading={loading}
         color={"#0064AD"}
         disabledColor="#D7DDE0"
         label="Verify"
@@ -155,6 +218,8 @@ const styles = StyleSheet.create({
     paddingLeft: 16,
     paddingRight: 16,
     paddingBottom: 12,
+    backgroundColor: "#fff",
+
     // backgroundColor: "blue",
   },
   backButton: {
