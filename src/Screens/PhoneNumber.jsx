@@ -131,7 +131,6 @@ const styles = StyleSheet.create({
     margin: 0,
     flex: 1,
     borderWidth: 0,
-    outline: "none",
   },
   title: {
     fontSize: 24,
