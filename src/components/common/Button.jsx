@@ -7,6 +7,7 @@ import { Body } from "./Body";
 const Button = ({
   label,
   color = "#0064AD",
+  disabledColor = "#99d5ff",
   labelStyle = {},
   width = "auto",
   height = 48,
@@ -17,7 +18,7 @@ const Button = ({
   onPress,
 }) => {
   const buttonWidth = fullWidth ? "100%" : width;
-  const disabledColor = "#99d5ff";
+  // const disabledColor = "#99d5ff";
   const currentColor = isDisabled ? disabledColor : color;
   const borderColor = outline ? labelStyle?.color ?? "0064AD" : undefined;
   const borderWidth = outline ? 2 : 0;
