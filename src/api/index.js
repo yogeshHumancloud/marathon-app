@@ -68,7 +68,6 @@ export const sendOTP = async (body) => {
       const response = await client.post("v1/auth/send-otp-sms/", body);
       resolve(response.data);
     } catch (error) {
-      console.log(error);
       reject(error);
     }
   });
@@ -78,6 +77,17 @@ export const verifyOTP = async (body) => {
   return new Promise(async (resolve, reject) => {
     try {
       const response = await client.post("v1/auth/verify-otp-sms/", body);
+      resolve(response.data);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+export const getEvents = async () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await client.get("/v1/events");
       resolve(response.data);
     } catch (error) {
       reject(error);
@@ -154,7 +164,6 @@ export const getRefreshToken = async (originalConfig) => {
       };
       resolve(newConfig);
     } catch (error) {
-      console.log("error", error);
       store.dispatch(deleteUser());
       reject(error?.response?.data || error);
     }
@@ -190,14 +199,12 @@ client.interceptors.response.use(
     const originalConfig = error.config;
     if (error.response && !originalConfig._retry) {
       const { status } = error.response;
-      console.log("originalConfig.env.url", originalConfig.url);
       if (status === 401 && !originalConfig.url?.includes("refresh-tokens")) {
         originalConfig._retry = true;
         try {
           const updatedConfig = await getRefreshToken(originalConfig);
           return client(updatedConfig);
         } catch (_error) {
-          console.log("_error", _error);
           if (_error.code === 401) {
             store.dispatch(deleteUser());
           }

@@ -14,6 +14,8 @@ import { useSelector } from "react-redux";
 import PhoneNumber from "../Screens/PhoneNumber";
 import OTPVerification from "../Screens/OTPVerification";
 import DashboardNavigator from "./DashboardNavigator";
+import Welcome from "../Screens/Welcome";
+import ChooseUser from "../Screens/ChooseUser";
 
 const AuthStack = createNativeStackNavigator();
 const Auth = () => {
@@ -21,6 +23,7 @@ const Auth = () => {
     <AuthStack.Navigator
       screenOptions={{
         headerShown: false,
+        animation: "slide_from_right",
       }}
     >
       <AuthStack.Screen name="phonenumber" component={PhoneNumber} />
@@ -31,12 +34,22 @@ const Auth = () => {
 
 const MainStack = createNativeStackNavigator();
 const Main = () => {
+  const marathon = useSelector((store) => store.marathon);
   return (
     <MainStack.Navigator
+      initialRouteName={
+        marathon.marathon?.id !== undefined &&
+        marathon.marathon?.selectedType?.id !== undefined
+          ? "dashboard"
+          : "welcome"
+      }
       screenOptions={{
         headerShown: false,
+        animation: "slide_from_right",
       }}
     >
+      <MainStack.Screen name="welcome" component={Welcome} />
+      <MainStack.Screen name="choosetype" component={ChooseUser} />
       <MainStack.Screen name="dashboard" component={DashboardNavigator} />
     </MainStack.Navigator>
   );
@@ -102,12 +115,12 @@ export default () => {
 
   const user = useSelector((store) => store.user);
 
-  useEffect(() => {
-    console.log(
-      "USER DATA CHANGE RECEIVED FROM APPNABIGUEGD",
-      JSON.stringify(user)
-    );
-  }, [user]);
+  // useEffect(() => {
+  //   console.log(
+  //     "USER DATA CHANGE RECEIVED FROM APPNABIGUEGD",
+  //     JSON.stringify(user)
+  //   );
+  // }, [user]);
 
   return (
     <NavigationContainer>

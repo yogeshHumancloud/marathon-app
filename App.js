@@ -9,6 +9,7 @@ import Toast from "react-native-toast-message";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { PersistGate } from "redux-persist/integration/react";
 import Welcome from "./src/Screens/Welcome";
+import { MenuProvider } from "react-native-popup-menu";
 import ChooseUser from "./src/Screens/ChooseUser";
 
 export default function App() {
@@ -31,16 +32,18 @@ export default function App() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <StatusBar style="auto" backgroundColor="#fff" />
-        <View style={styles.container} onLayout={onLayoutRootView}>
-          {/* <Login /> */}
-          {/* <OTPVerification /> */}
-          {/* <PhoneNumber /> */}
-          {/* <DashboardNavigator /> */}
-          <AppNavigator />
-          {/* <ChooseUser /> */}
-          {/* <Welcome /> */}
-          <Toast />
-        </View>
+        <MenuProvider>
+          <View style={styles.container} onLayout={onLayoutRootView}>
+            {/* <Login /> */}
+            {/* <OTPVerification /> */}
+            {/* <PhoneNumber /> */}
+            {/* <DashboardNavigator /> */}
+            {/* <Welcome /> */}
+            {/* <ChooseUser /> */}
+            <AppNavigator />
+            <Toast />
+          </View>
+        </MenuProvider>
       </PersistGate>
     </Provider>
   );

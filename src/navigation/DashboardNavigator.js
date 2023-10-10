@@ -9,9 +9,19 @@ import Constants from "expo-constants";
 import { ImagesSource } from "../assets/images/images";
 import Leaderboard from "../Screens/Leaderboard";
 import Results from "../Screens/Results";
+import {
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuTrigger,
+} from "react-native-popup-menu";
+import { useDispatch } from "react-redux";
+import { deleteUser } from "../reduxToolkit/user/userSlice";
+import { deleteMarathon } from "../reduxToolkit/marathon/marathonSlice";
 const Tab = createBottomTabNavigator();
 
 const DashboardNavigator = () => {
+  const dispatch = useDispatch();
   return (
     // <NavigationContainer>
     <Tab.Navigator
@@ -74,10 +84,57 @@ const DashboardNavigator = () => {
               >
                 {route.name}
               </Text>
-              <Image
+              <Menu>
+                <MenuTrigger
+                  children={
+                    <Image
+                      style={{ width: 36, height: 36, resizeMode: "cover" }}
+                      source={ImagesSource.mainScreen.ProfilePictire}
+                    />
+                  }
+                />
+                <MenuOptions
+                  customStyles={{
+                    optionsContainer: {
+                      marginTop: 40,
+                      width: 120,
+                      elevation: 5,
+                      backgroundColor: "#fff",
+                      borderColor: "#999",
+                      borderWidth: 1,
+                    },
+                    optionWrapper: {
+                      padding: 10,
+                    },
+                    optionTouchable: {
+                      activeOpacity: 70,
+                    },
+                    optionText: {
+                      color: "red",
+                    },
+                  }}
+                >
+                  <MenuOption
+                    onSelect={() => {
+                      dispatch(deleteUser());
+                      dispatch(deleteMarathon());
+                    }}
+                    text="Logout"
+                  />
+                  {/* <MenuOption onSelect={() => alert(`Delete`)}>
+                    <Text style={{ color: "red" }}>Delete</Text>
+                  </MenuOption>
+                  <MenuOption
+                    onSelect={() => alert(`Not called`)}
+                    disabled={true}
+                    text="Disabled"
+                  /> */}
+                </MenuOptions>
+              </Menu>
+              {/* <Image
                 style={{ width: 36, height: 36, resizeMode: "cover" }}
                 source={ImagesSource.mainScreen.ProfilePictire}
-              />
+              /> */}
             </View>
           );
         },

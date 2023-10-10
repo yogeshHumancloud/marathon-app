@@ -1,4 +1,11 @@
-import { StyleSheet, View, TextInput, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  ScrollView,
+  ActivityIndicator,
+  Text,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Card from "../components/common/Card";
@@ -7,13 +14,16 @@ import { getEventBibs } from "../api";
 const Leaderboard = () => {
   const [bibs, setBibs] = useState([]);
   const [searchValue, setSearchValue] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchBibs = async () => {
+      setLoading(true);
       const data = await getEventBibs({
         query: searchValue !== "" ? searchValue : undefined,
       });
       setBibs(data.data.results);
+      setLoading(false);
     };
     fetchBibs();
   }, [searchValue]);
@@ -50,9 +60,21 @@ const Leaderboard = () => {
         />
       </View>
       <ScrollView style={{ marginTop: 24 }}>
-        {bibs.map((bib) => (
-          <Card bib={bib} />
-        ))}
+        {loading ? (
+          <ActivityIndicator color={"#999"} size={"large"} />
+        ) : bibs.length > 0 ? (
+          bibs.map((bib, index) => <Card key={index} bib={bib} />)
+        ) : (
+          <Text
+            style={{
+              textAlign: "center",
+              fontSize: 16,
+              color: "#000",
+            }}
+          >
+            No data found
+          </Text>
+        )}
       </ScrollView>
     </View>
   );

@@ -13,17 +13,20 @@ import Runner from "../assets/icons/Runner";
 import Bicycle from "../assets/icons/BicycleIcon";
 import { TouchableOpacity } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
+import { setMarathon } from "../reduxToolkit/marathon/marathonSlice";
+import { useDispatch, useSelector } from "react-redux";
 
-const ChooseUser = () => {
-  const [selectedMarathon, setSelectedMarathon] = useState("44445");
-  const [loading, setLoading] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState("run");
+const ChooseUser = ({ navigation }) => {
+  const dispatch = useDispatch();
+  const [selectedType, setSelectedType] = useState({});
+  const marathon = useSelector((store) => store.marathon);
+  // const [loading, setLoading] = useState(false);
+  // const [selectedActivity, setSelectedActivity] = useState("run");
+
   const handleEventSelect = (id) => {
-    setSelectedMarathon(id);
+    setSelectedType(id);
   };
-  const handleActivitySelect = (id) => {
-    setSelectedActivity(id);
-  };
+
   const renderItem = ({ item, index }) => {
     return (
       <EventCard
@@ -31,28 +34,23 @@ const ChooseUser = () => {
         text={item.text}
         key={item.id}
         id={item.id}
+        item={item}
         onPress={handleEventSelect}
-        isSelected={item.id === selectedMarathon}
+        isSelected={item.id === selectedType?.id}
       />
     );
   };
-  const renderActivityItem = ({ item, index }) => {
-    return (
-      <ActivityCard
-        ImageSource={item.ImageSource}
-        text={item.text}
-        key={item.id}
-        id={item.id}
-        onPress={handleActivitySelect}
-        isSelected={item.id === selectedActivity}
-      />
-    );
+
+  const handleNext = () => {
+    dispatch(setMarathon({ ...marathon.marathon, selectedType }));
+    navigation.replace("dashboard");
   };
+
   return (
     <View style={styles.mainContainer}>
       <TouchableOpacity
         onPress={() => {
-          console.log("back");
+          navigation.goBack();
         }}
         style={styles.backButton}
       >
@@ -65,7 +63,7 @@ const ChooseUser = () => {
       </Text>
       <Text style={styles.subtext}>Are you a?</Text>
       <FlatList
-        contentContainerStyle={{ marginTop: 50 }}
+        contentContainerStyle={{ marginTop: 48 }}
         data={[
           {
             id: "44445",
@@ -82,26 +80,12 @@ const ChooseUser = () => {
         renderItem={renderItem}
       />
 
-      <Button
-        color={"#0064AD"}
-        label="Next"
-        onPress={() => console.log("next")}
-        isLoading={loading}
-      />
+      <Button color={"#0064AD"} label="Next" onPress={handleNext} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "flex-start",
-    paddingTop: 44,
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: "#fff",
-  },
   titleNext3: {
     fontSize: 24,
     marginBottom: 0,
@@ -137,13 +121,32 @@ const styles = StyleSheet.create({
     marginTop: 0,
     padding: 0,
   },
-  title2: {
-    fontSize: 20,
+  mainContainer: {
+    flex: 1,
+    // flexDirection: "column",
+    // justifyContent: "flex-start",
+    // alignItems: "flex-start",
+    // paddingTop: 44,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    paddingTop: 48,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 24,
     marginBottom: 16,
     fontFamily: "Montserrat",
     fontWeight: "700",
     marginTop: 32,
     padding: 5,
+  },
+  title2: {
+    fontSize: 14,
+    // marginBottom: 16,
+    fontFamily: "Montserrat",
+    fontWeight: "700",
+    // marginTop: 32,
+    // padding: 5,
   },
   subtext: {
     fontSize: 16,
@@ -151,13 +154,13 @@ const styles = StyleSheet.create({
     paddingLeft: 5,
     paddingRight: 20,
     lineHeight: 20,
-    marginTop: 10,
+    marginTop: 24,
+    marginBottom: 12,
     flexWrap: "wrap",
     color: "#666",
-    marginTop: 16,
   },
+
   backButton: {
-    paddingHorizontal: 5,
     marginBottom: 32,
   },
 });

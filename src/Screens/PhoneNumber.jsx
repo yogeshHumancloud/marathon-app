@@ -51,14 +51,14 @@ const PhoneNumber = ({ navigation }) => {
 
   return (
     <View style={styles.mainContainer}>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={() => {
           console.log("back");
         }}
         style={styles.backButton}
       >
         <AntDesign name="arrowleft" size={24} color="black" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <Text style={styles.title}>Enter Phone Number</Text>
 
       <Text style={styles.subtext}>

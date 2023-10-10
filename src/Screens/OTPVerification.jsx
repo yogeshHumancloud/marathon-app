@@ -15,10 +15,6 @@ const OTPVerification = ({ onVerify, navigation, route }) => {
   const [text, setText] = React.useState("");
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    console.log("OTP lenght", text.length);
-  }, [text]);
-
   handleResendOtp = async () => {
     try {
       const response = await sendOTP({

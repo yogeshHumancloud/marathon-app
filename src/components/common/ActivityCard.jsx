@@ -10,43 +10,68 @@ const ActivityCard = ({
   isSelected = false,
 }) => {
   return (
-    <View
-      style={
-        isSelected
-          ? { ...styles.container, ...styles.selected }
-          : styles.activityConatiner
-      }
+    <TouchableOpacity
+      style={styles.container}
+      onPress={() => onPress(id)}
+      activeOpacity={0.9}
     >
-      <TouchableOpacity onPress={() => onPress(id)}>
-        <View style={styles.imageContainer}>{ImageSource}</View>
-        <Text>{text}</Text>
-      </TouchableOpacity>
-    </View>
+      <View
+        style={
+          isSelected
+            ? { ...styles.imageContainer, ...styles.selectedImageContainer }
+            : styles.imageContainer
+        }
+      >
+        {ImageSource}
+      </View>
+      <Text
+        style={
+          isSelected
+            ? { ...styles.subtext, ...styles.selectedSubText }
+            : styles.subtext
+        }
+      >
+        {text}
+      </Text>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
+    padding: 4,
   },
   selected: {
-    borderWidth: 1,
-    borderColor: "#0064AD",
+    // borderWidth: 1,
+    // borderColor: "#0064AD",
   },
   imageContainer: {
-    height: 50,
-    width: 50,
+    padding: 24,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 10,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "#0064AD1A",
+  },
+  selectedImageContainer: {
+    borderWidth: 2,
+    borderColor: "#0064AD66",
+    backgroundColor: "#0064AD1A",
   },
   subtext: {
-    fontSize: 16,
-    fontWeight: "400",
-    color: "#666",
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#C0BDC9",
+    marginTop: 8,
+  },
+  selectedSubText: {
+    color: "#0064AD",
   },
 });
 export default ActivityCard;

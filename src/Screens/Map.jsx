@@ -100,11 +100,11 @@ const Map = () => {
         paddingTop: 24,
       }}
     >
-      <Button
+      {/* <Button
         label={"loguot"}
         onPress={() => dispatch(deleteUser())}
         width={50}
-      />
+      /> */}
       <View
         style={{
           width: "100%",
@@ -134,8 +134,9 @@ const Map = () => {
           gap: 8,
         }}
       >
-        {categories.map((cate) => (
+        {categories.map((cate, index) => (
           <TouchableOpacity
+            key={index}
             activeOpacity={0.9}
             onPress={() => {
               setSelectedCategory(cate);
@@ -196,6 +197,7 @@ const Map = () => {
         >
           <UrlTile
             urlTemplate="https://tile.openstreetmap.de/{z}/{x}/{y}.png"
+            // urlTemplate="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             zIndex={-1}
           />
 
