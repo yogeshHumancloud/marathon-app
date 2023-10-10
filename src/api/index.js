@@ -1,6 +1,7 @@
 import axios from "axios";
 import { baseURL } from "../constants";
 import { store } from "../reduxToolkit/store";
+import { deleteUser, setUser } from "../reduxToolkit/user/userSlice";
 
 const getToken = async (isRefreshToken) => {
   try {
@@ -131,25 +132,30 @@ export const getEventBibs = async (body) => {
   });
 };
 
-export const getRefreshToken = async () => {
+export const getRefreshToken = async (originalConfig) => {
   const refreshToken = await getToken(true);
-  console.log(refreshToken);
   return new Promise(async (resolve, reject) => {
     try {
       const response = await client.post("v1/auth/refresh-tokens", {
         refreshToken: refreshToken?.token,
       });
       const respo = response.data;
-      store.dispatch({
-        type: "updateUser",
-        payload: { ...refreshToken?.user, tokens: { ...respo } },
-      });
-      resolve();
+
+      store.dispatch(setUser({ ...refreshToken?.user, tokens: { ...respo } }));
+      const newConfig = {
+        ...originalConfig,
+        env: {
+          ...originalConfig.env,
+          headers: {
+            ...originalConfig.env.headers,
+            Authorization: `Bearer ${respo.access.token}`,
+          },
+        },
+      };
+      resolve(newConfig);
     } catch (error) {
-      console.log(error);
-      store.dispatch({
-        type: "deleteUser",
-      });
+      console.log("error", error);
+      store.dispatch(deleteUser());
       reject(error?.response?.data || error);
     }
   });
@@ -184,14 +190,17 @@ client.interceptors.response.use(
     const originalConfig = error.config;
     if (error.response && !originalConfig._retry) {
       const { status } = error.response;
-      if (status === 401) {
+      console.log("originalConfig.env.url", originalConfig.url);
+      if (status === 401 && !originalConfig.url?.includes("refresh-tokens")) {
         originalConfig._retry = true;
         try {
-          if (originalConfig.headers.Authorization) {
-            await getRefreshToken();
-          }
-          return client(originalConfig);
+          const updatedConfig = await getRefreshToken(originalConfig);
+          return client(updatedConfig);
         } catch (_error) {
+          console.log("_error", _error);
+          if (_error.code === 401) {
+            store.dispatch(deleteUser());
+          }
           return Promise.reject(_error);
         }
       }

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -101,7 +101,14 @@ export default () => {
   // const user = auth.user;
 
   const user = useSelector((store) => store.user);
-  console.log(user);
+
+  useEffect(() => {
+    console.log(
+      "USER DATA CHANGE RECEIVED FROM APPNABIGUEGD",
+      JSON.stringify(user)
+    );
+  }, [user]);
+
   return (
     <NavigationContainer>
       {user?.user == null && <Auth />}
