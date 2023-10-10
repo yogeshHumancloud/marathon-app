@@ -8,6 +8,7 @@ import { persistor, store } from "./src/reduxToolkit/store";
 import Toast from "react-native-toast-message";
 import AppNavigator from "./src/navigation/AppNavigator";
 import { PersistGate } from "redux-persist/integration/react";
+import Welcome from "./src/Screens/Welcome";
 
 export default function App() {
   const [fontsLoaded, fontError] = Font.useFonts({
@@ -35,6 +36,7 @@ export default function App() {
           {/* <PhoneNumber /> */}
           {/* <DashboardNavigator /> */}
           <AppNavigator />
+          {/* <Welcome /> */}
           <Toast />
         </View>
       </PersistGate>
