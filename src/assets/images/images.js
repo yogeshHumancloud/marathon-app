@@ -11,4 +11,10 @@ export const ImagesSource = {
     runner: require("./runner_1.png"),
     spectator: require("./runner_2.png"),
   },
+  Maps: {
+    marker: require("./mapsmarker1.png"),
+  },
+  Profile: {
+    placeholder: require("./profile_placeholder.jpg"),
+  },
 };

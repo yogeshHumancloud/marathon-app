@@ -8,12 +8,11 @@
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
+      "width": 10,
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.humancloud.marathon"
@@ -33,6 +32,14 @@
         "projectId": "c03b986f-2ae5-449d-9bb5-89c88280ffe7"
       }
     },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Marathon to use your location."
+        }
+      ]
+    ],
     "owner": "suraj-humancloud"
   }
 }

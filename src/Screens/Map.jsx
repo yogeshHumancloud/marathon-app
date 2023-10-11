@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MapView, {
+  Marker,
   PROVIDER_DEFAULT,
   Polyline,
   UrlTile,
@@ -18,16 +19,22 @@ import { getEventData } from "../api";
 import Button from "../components/common/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteUser } from "../reduxToolkit/user/userSlice";
+import { ImagesSource } from "../assets/images/images";
+import * as Location from "expo-location";
+import socket from "../api/socket";
 
 const Map = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const polylineref = useRef(null);
+  const markerRef = useRef(null);
   const dispatch = useDispatch();
   const [categories, setCategories] = useState([]);
   const [route, setRoute] = useState([]);
+  const [currentLocation, setCurrentLocation] = useState({});
 
   const [selectedCategory, setSelectedCategory] = useState({});
   const selectedMarathon = useSelector((store) => store.marathon);
+  const user = useSelector((store) => store.user);
 
   const fetchRoute = async (points) => {
     setLoading(true);
@@ -78,7 +85,75 @@ const Map = ({ navigation }) => {
       }
     };
     fetchData();
+
+    // const onSocketReceived = (res) => {
+    //   console.log(res);
+    // };
+    // socket.on("test", onSocketReceived);
+
+    // return () => {
+    //   socket.off("test", onSocketReceived);
+    // };
   }, []);
+
+  useEffect(() => {
+    let sendUpdatedLocationInterval;
+    if (
+      selectedMarathon.marathon?.selectedType?.text?.toLowerCase() === "runner"
+    ) {
+      sendUpdatedLocationInterval = setInterval(() => {
+        socket.emit("updateRunnerLocation", {
+          user: user.user.user.id,
+          marathon: selectedMarathon.marathon.id,
+          currentLocation,
+        });
+      }, 10000);
+
+      socket.on(
+        `${user.user.user.id}-${selectedMarathon.marathon.id}`,
+        (message) => {
+          console.log(message);
+        }
+      );
+    }
+
+    return () => {
+      clearInterval(sendUpdatedLocationInterval);
+    };
+  }, [selectedMarathon, currentLocation]);
+
+  const fetchCurrentLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Permission to access location was denied");
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+
+    setCurrentLocation({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    });
+  };
+
+  useEffect(() => {
+    fetchCurrentLocation();
+
+    const locationInterval = setInterval(() => {
+      fetchCurrentLocation();
+    }, 5000);
+
+    return () => {
+      clearInterval(locationInterval);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (markerRef.current && currentLocation.latitude) {
+      markerRef.current.animateMarkerToCoordinate(currentLocation, 200);
+    }
+  }, [currentLocation]);
 
   useEffect(() => {
     if (selectedCategory.route?.[0].points?.length > 0) {
@@ -179,7 +254,7 @@ const Map = ({ navigation }) => {
           </TouchableOpacity>
         ))}
       </View>
-      <View style={{ marginVertical: 24, flex: 1, overflow: "hidden" }}>
+      <View style={{ marginTop: 24, flex: 1, overflow: "hidden" }}>
         {/* {loading && <Text>Loading...</Text>} */}
         <MapView
           mapType="none"
@@ -224,6 +299,14 @@ const Map = ({ navigation }) => {
             strokeColor={"#FF0000"}
             strokeWidth={3}
           />
+          {currentLocation.latitude && (
+            <Marker.Animated
+              ref={markerRef}
+              image={ImagesSource.Maps.marker}
+              title="Current Location"
+              coordinate={currentLocation}
+            />
+          )}
         </MapView>
         {loading && (
           <View

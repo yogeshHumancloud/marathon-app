@@ -23,11 +23,13 @@ const Card = ({ bib, isResult = false }) => {
           height: "100%",
           resizeMode: "cover",
         }}
-        source={{
-          uri: bib.picture
-            ? bib.picture
-            : `https://st3.depositphotos.com/9998432/13335/v/450/depositphotos_133352010-stock-illustration-default-placeholder-man-and-woman.jpg`,
-        }}
+        source={
+          bib.picture
+            ? {
+                uri: bib.picture,
+              }
+            : ImagesSource.Profile.placeholder
+        }
       />
       <View style={{ flex: 1 }}>
         <Text style={{ color: "#333", fontSize: 16, fontWeight: "700" }}>

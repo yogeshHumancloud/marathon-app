@@ -65,6 +65,7 @@ const styles = StyleSheet.create({
     width: "90%",
     height: 100,
     borderRadius: 4,
+    resizeMode: "repeat",
   },
   subtext: {
     marginTop: 8,
