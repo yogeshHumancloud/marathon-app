@@ -2,7 +2,7 @@ import { Image, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { ImagesSource } from "../../assets/images/images";
 
-const Card = ({ bib }) => {
+const Card = ({ bib, isResult = false }) => {
   return (
     <View
       style={{
@@ -23,7 +23,11 @@ const Card = ({ bib }) => {
           height: "100%",
           resizeMode: "cover",
         }}
-        source={ImagesSource.mainScreen.ProfilePictire}
+        source={{
+          uri: bib.picture
+            ? bib.picture
+            : `https://st3.depositphotos.com/9998432/13335/v/450/depositphotos_133352010-stock-illustration-default-placeholder-man-and-woman.jpg`,
+        }}
       />
       <View style={{ flex: 1 }}>
         <Text style={{ color: "#333", fontSize: 16, fontWeight: "700" }}>
@@ -45,8 +49,10 @@ const Card = ({ bib }) => {
             justifyContent: "space-between",
           }}
         >
-          <Text style={{ color: "#999", fontSize: 14 }}>Current Position:</Text>
-          <Text style={{ color: "#333", fontSize: 14 }}>User Name</Text>
+          <Text style={{ color: "#999", fontSize: 14 }}>
+            {isResult ? "Rank:" : "Current Position:"}
+          </Text>
+          <Text style={{ color: "#333", fontSize: 14 }}>{bib.position}</Text>
         </View>
         <View
           style={{
@@ -54,8 +60,12 @@ const Card = ({ bib }) => {
             justifyContent: "space-between",
           }}
         >
-          <Text style={{ color: "#999", fontSize: 14 }}>Start Time:</Text>
-          <Text style={{ color: "#333", fontSize: 14 }}>User Name</Text>
+          <Text style={{ color: "#999", fontSize: 14 }}>
+            {isResult ? "Award Time:" : "Start Time:"}
+          </Text>
+          <Text style={{ color: "#333", fontSize: 14 }}>
+            {isResult ? bib.award_time : bib.start_time}
+          </Text>
         </View>
       </View>
     </View>

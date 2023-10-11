@@ -15,13 +15,15 @@ import {
   MenuOptions,
   MenuTrigger,
 } from "react-native-popup-menu";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { deleteUser } from "../reduxToolkit/user/userSlice";
 import { deleteMarathon } from "../reduxToolkit/marathon/marathonSlice";
 const Tab = createBottomTabNavigator();
 
-const DashboardNavigator = () => {
+const DashboardNavigator = ({ navigation }) => {
   const dispatch = useDispatch();
+  const user = useSelector((store) => store.user);
+
   return (
     // <NavigationContainer>
     <Tab.Navigator
@@ -89,7 +91,11 @@ const DashboardNavigator = () => {
                   children={
                     <Image
                       style={{ width: 36, height: 36, resizeMode: "cover" }}
-                      source={ImagesSource.mainScreen.ProfilePictire}
+                      source={{
+                        uri: user.user?.profile_picture
+                          ? user.user?.profile_picture
+                          : `https://st3.depositphotos.com/9998432/13335/v/450/depositphotos_133352010-stock-illustration-default-placeholder-man-and-woman.jpg`,
+                      }}
                     />
                   }
                 />
@@ -109,18 +115,26 @@ const DashboardNavigator = () => {
                     optionTouchable: {
                       activeOpacity: 70,
                     },
-                    optionText: {
-                      color: "red",
-                    },
                   }}
                 >
+                  <MenuOption
+                    onSelect={() => {
+                      dispatch(deleteMarathon());
+                      navigation.reset({
+                        index: 0,
+                        routes: [{ name: "welcome" }],
+                      });
+                    }}
+                    text="Change Event"
+                  />
                   <MenuOption
                     onSelect={() => {
                       dispatch(deleteUser());
                       dispatch(deleteMarathon());
                     }}
-                    text="Logout"
-                  />
+                  >
+                    <Text style={{ color: "red" }}>Logout</Text>
+                  </MenuOption>
                   {/* <MenuOption onSelect={() => alert(`Delete`)}>
                     <Text style={{ color: "red" }}>Delete</Text>
                   </MenuOption>

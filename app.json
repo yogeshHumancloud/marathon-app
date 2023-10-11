@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "marathon-app",
-    "slug": "marathon-app",
+    "slug": "marathon",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,16 +15,24 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.humancloud.marathon"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.surajhumancloud.marathon"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c03b986f-2ae5-449d-9bb5-89c88280ffe7"
+      }
+    },
+    "owner": "suraj-humancloud"
   }
 }

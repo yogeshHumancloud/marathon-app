@@ -16,10 +16,10 @@ import MapView, {
 import axios from "axios";
 import { getEventData } from "../api";
 import Button from "../components/common/Button";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { deleteUser } from "../reduxToolkit/user/userSlice";
 
-const Map = () => {
+const Map = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const polylineref = useRef(null);
   const dispatch = useDispatch();
@@ -27,6 +27,7 @@ const Map = () => {
   const [route, setRoute] = useState([]);
 
   const [selectedCategory, setSelectedCategory] = useState({});
+  const selectedMarathon = useSelector((store) => store.marathon);
 
   const fetchRoute = async (points) => {
     setLoading(true);
@@ -63,9 +64,18 @@ const Map = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getEventData();
-      setCategories(data.event.categories);
-      setSelectedCategory(data.event.categories[0]);
+      if (selectedMarathon.marathon?.id) {
+        const data = await getEventData({
+          event_id: selectedMarathon.marathon?.id,
+        });
+        setCategories(data.event.categories);
+        setSelectedCategory(data.event.categories[0]);
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "welcome" }],
+        });
+      }
     };
     fetchData();
   }, []);

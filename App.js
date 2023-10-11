@@ -14,7 +14,7 @@ import ChooseUser from "./src/Screens/ChooseUser";
 
 export default function App() {
   const [fontsLoaded, fontError] = Font.useFonts({
-    "Montserrat-VariableFont_wght": require("./src/assets/fonts/Montserrat-VariableFont_wght.ttf"),
+    Montserrat: require("./src/assets/fonts/Montserrat-VariableFont_wght.ttf"),
   });
 
   SplashScreen.preventAutoHideAsync();

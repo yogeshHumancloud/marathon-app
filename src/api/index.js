@@ -95,10 +95,10 @@ export const getEvents = async () => {
   });
 };
 
-export const getEventData = async () => {
+export const getEventData = async (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const response = await client.get("/v1/events/651ffd270eadceeba1ba2fda");
+      const response = await client.get(`/v1/events/${data.event_id}`);
       resolve(response.data);
     } catch (error) {
       reject(error);
@@ -131,7 +131,7 @@ export const getEventBibs = async (body) => {
     }
     try {
       const response = await client.get(
-        `/v1/events/651ffd270eadceeba1ba2fda/getBibs${
+        `/v1/events/${body.event_id}/getBibs${
           queryParams.length > 0 ? "?" + queryParams.join("&") : ""
         }`
       );

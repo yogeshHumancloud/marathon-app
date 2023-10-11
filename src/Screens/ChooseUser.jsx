@@ -15,6 +15,7 @@ import { TouchableOpacity } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { setMarathon } from "../reduxToolkit/marathon/marathonSlice";
 import { useDispatch, useSelector } from "react-redux";
+import Toast from "react-native-toast-message";
 
 const ChooseUser = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -42,8 +43,19 @@ const ChooseUser = ({ navigation }) => {
   };
 
   const handleNext = () => {
-    dispatch(setMarathon({ ...marathon.marathon, selectedType }));
-    navigation.replace("dashboard");
+    if (selectedType.id) {
+      dispatch(setMarathon({ ...marathon.marathon, selectedType }));
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "dashboard" }],
+      });
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Select option to continue",
+        position: "bottom",
+      });
+    }
   };
 
   return (

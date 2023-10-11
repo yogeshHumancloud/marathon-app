@@ -10,20 +10,31 @@ import React, { useEffect, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Card from "../components/common/Card";
 import { getEventBibs } from "../api";
+import { useSelector } from "react-redux";
 
-const Leaderboard = () => {
+const Leaderboard = ({ navigation }) => {
   const [bibs, setBibs] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const selectedMarathon = useSelector((store) => store.marathon);
 
   useEffect(() => {
     const fetchBibs = async () => {
-      setLoading(true);
-      const data = await getEventBibs({
-        query: searchValue !== "" ? searchValue : undefined,
-      });
-      setBibs(data.data.results);
-      setLoading(false);
+      if (selectedMarathon.marathon?.id) {
+        setLoading(true);
+        const data = await getEventBibs({
+          event_id: selectedMarathon.marathon?.id,
+          query: searchValue !== "" ? searchValue : undefined,
+          sortBy: "position",
+        });
+        setBibs(data.data.results);
+        setLoading(false);
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "welcome" }],
+        });
+      }
     };
     fetchBibs();
   }, [searchValue]);
