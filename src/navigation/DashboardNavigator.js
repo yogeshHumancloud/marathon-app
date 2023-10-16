@@ -19,6 +19,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteUser } from "../reduxToolkit/user/userSlice";
 import { deleteMarathon } from "../reduxToolkit/marathon/marathonSlice";
 import ActivityStart from "../Screens/ActivityStart";
+import MarathonList from "../Screens/MarathonList";
+import MarathonCategoryList from "../Screens/MarathonCategoryList";
+import MarathonDetails from "../Screens/MarathonDetails";
 const Tab = createBottomTabNavigator();
 
 const DashboardNavigator = ({ navigation }) => {
@@ -157,7 +160,7 @@ const DashboardNavigator = ({ navigation }) => {
         },
       })}
     >
-      <Tab.Screen name="Map" component={ActivityStart} />
+      <Tab.Screen name="Map" component={MarathonDetails} />
       <Tab.Screen name="Leaderboard" component={Leaderboard} />
       <Tab.Screen name="Results" component={Results} />
     </Tab.Navigator>
