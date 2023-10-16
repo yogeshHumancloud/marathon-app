@@ -15,7 +15,7 @@ import MapView, {
   UrlTile,
 } from "react-native-maps";
 import axios from "axios";
-import { getEventData } from "../api";
+import { getEventBibs, getEventData } from "../api";
 import Button from "../components/common/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteUser } from "../reduxToolkit/user/userSlice";
@@ -25,14 +25,19 @@ import socket from "../api/socket";
 
 const Map = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
+
   const polylineref = useRef(null);
   const markerRef = useRef(null);
   const dispatch = useDispatch();
   const [categories, setCategories] = useState([]);
   const [route, setRoute] = useState([]);
   const [currentLocation, setCurrentLocation] = useState({});
+  const [searchResults, setSearchResults] = useState([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [selectedCategory, setSelectedCategory] = useState({});
+  const [searchValue, setSearchValue] = useState("");
   const selectedMarathon = useSelector((store) => store.marathon);
   const user = useSelector((store) => store.user);
 
@@ -108,7 +113,7 @@ const Map = ({ navigation }) => {
           currentLocation,
         });
       }, 10000);
-
+    } else {
       socket.on(
         `${user.user.user.id}-${selectedMarathon.marathon.id}`,
         (message) => {
@@ -121,6 +126,28 @@ const Map = ({ navigation }) => {
       clearInterval(sendUpdatedLocationInterval);
     };
   }, [selectedMarathon, currentLocation]);
+
+  useEffect(() => {
+    const fetchBibs = async () => {
+      if (selectedMarathon.marathon?.id) {
+        setSearchLoading(true);
+        const data = await getEventBibs({
+          event_id: selectedMarathon.marathon?.id,
+          query: searchValue !== "" ? searchValue : undefined,
+          sortBy: "position",
+        });
+        console.log(data.data.results?.slice(0, 5));
+        setSearchResults(data.data.results?.slice(0, 5));
+        setSearchLoading(false);
+      } else {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "welcome" }],
+        });
+      }
+    };
+    fetchBibs();
+  }, [searchValue, selectedMarathon]);
 
   const fetchCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -200,10 +227,19 @@ const Map = ({ navigation }) => {
           paddingVertical: 12,
           paddingHorizontal: 16,
           flexDirection: "row",
+          position: "relative",
         }}
       >
         <Ionicons name="search" size={24} color="#666666" />
         <TextInput
+          onFocus={() => {
+            setIsDropdownOpen(true);
+          }}
+          onBlur={() => {
+            setIsDropdownOpen(false);
+          }}
+          value={searchValue}
+          onChangeText={setSearchValue}
           style={{ flex: 1, marginLeft: 10, fontSize: 16 }}
           placeholder="Search by name or BIB No."
           placeholderTextColor="#999999"
@@ -321,6 +357,52 @@ const Map = ({ navigation }) => {
           >
             <ActivityIndicator size="large" color="#000" />
           </View>
+        )}
+      </View>
+      <View
+        style={{
+          display: isDropdownOpen ? "flex" : "none",
+          backgroundColor: "#fff",
+          elevation: 5,
+          top: 72,
+          right: 16,
+          left: 16,
+          maxHeight: 200,
+          position: "absolute",
+          padding: 16,
+        }}
+      >
+        {searchLoading ? (
+          <ActivityIndicator size={"small"}></ActivityIndicator>
+        ) : searchResults.length === 0 ? (
+          <Text
+            style={{
+              textAlign: "center",
+              fontSize: 16,
+              verticalAlign: "middle",
+            }}
+          >
+            No search results found
+          </Text>
+        ) : (
+          [
+            ...searchResults,
+            ...searchResults,
+            ...searchResults,
+            ...searchResults,
+          ].map((result) => (
+            <TouchableOpacity
+              style={{
+                paddingVertical: 8,
+                borderBottomColor: "#999",
+                borderBottomWidth: 1,
+              }}
+            >
+              <Text>
+                {result.bib_id} - {result.name}
+              </Text>
+            </TouchableOpacity>
+          ))
         )}
       </View>
     </View>
