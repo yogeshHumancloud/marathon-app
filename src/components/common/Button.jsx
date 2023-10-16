@@ -1,12 +1,13 @@
 import React from "react";
 import AnimatedPressable from "./AnimatedPress";
 import { Font } from "./constants";
-import { StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { Body } from "./Body";
 
 const Button = ({
   label,
   color = "#0064AD",
+  disabledColor = "#99d5ff",
   labelStyle = {},
   width = "auto",
   height = 48,
@@ -15,15 +16,16 @@ const Button = ({
   isDisabled = false,
   outline = false,
   onPress,
+  isLoading = false,
 }) => {
   const buttonWidth = fullWidth ? "100%" : width;
-  const disabledColor = "#99d5ff";
+  // const disabledColor = "#99d5ff";
   const currentColor = isDisabled ? disabledColor : color;
   const borderColor = outline ? labelStyle?.color ?? "0064AD" : undefined;
   const borderWidth = outline ? 2 : 0;
   return (
     <AnimatedPressable
-      disabled={isDisabled || !onPress}
+      disabled={isDisabled || !onPress || isLoading}
       style={{
         width: buttonWidth,
         marginBottom,
@@ -43,13 +45,13 @@ const Button = ({
         <Body
           align="center"
           color={labelStyle?.color ?? "white"}
-          style={{
-            fontFamily: labelStyle?.fontFamily ?? Font.MONTSERRAT,
-            fontSize: labelStyle?.fontSize ?? 16,
-          }}
+          // style={{
+          //   fontFamily: labelStyle?.fontFamily ?? Font.MONTSERRAT,
+          //   fontSize: labelStyle?.fontSize ?? 16,
+          // }}
           letterSpacing={labelStyle?.letterSpacing ?? 2}
         >
-          {label}
+          {isLoading && <ActivityIndicator color={"#fff"} />} {label}
         </Body>
       </View>
     </AnimatedPressable>

@@ -1,18 +1,20 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, ImageBackground } from "react-native";
-
+import { StyleSheet, View } from "react-native";
 import * as Font from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { ImagesSource } from "./src/assets/images/images";
 import { useCallback } from "react";
-import Button from "./src/components/common/Button";
 import { Provider } from "react-redux";
-import { store } from "./src/reduxToolkit/store";
-import Login from "./src/Screens/Login";
+import { persistor, store } from "./src/reduxToolkit/store";
+import Toast from "react-native-toast-message";
+import AppNavigator from "./src/navigation/AppNavigator";
+import { PersistGate } from "redux-persist/integration/react";
+import Welcome from "./src/Screens/Welcome";
+import { MenuProvider } from "react-native-popup-menu";
+import ChooseUser from "./src/Screens/ChooseUser";
 
 export default function App() {
   const [fontsLoaded, fontError] = Font.useFonts({
-    "Montserrat-VariableFont_wght": require("./src/assets/fonts/Montserrat-VariableFont_wght.ttf"),
+    Montserrat: require("./src/assets/fonts/Montserrat-VariableFont_wght.ttf"),
   });
 
   SplashScreen.preventAutoHideAsync();
@@ -28,10 +30,21 @@ export default function App() {
   }
   return (
     <Provider store={store}>
-      <View style={styles.container} onLayout={onLayoutRootView}>
-        <Login />
-        <StatusBar style="auto" />
-      </View>
+      <PersistGate loading={null} persistor={persistor}>
+        <StatusBar style="auto" backgroundColor="#fff" />
+        <MenuProvider>
+          <View style={styles.container} onLayout={onLayoutRootView}>
+            {/* <Login /> */}
+            {/* <OTPVerification /> */}
+            {/* <PhoneNumber /> */}
+            {/* <DashboardNavigator /> */}
+            {/* <Welcome /> */}
+            {/* <ChooseUser /> */}
+            <AppNavigator />
+            <Toast />
+          </View>
+        </MenuProvider>
+      </PersistGate>
     </Provider>
   );
 }
@@ -40,7 +53,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    // alignItems: "center",
+    // justifyContent: "center",
   },
 });
