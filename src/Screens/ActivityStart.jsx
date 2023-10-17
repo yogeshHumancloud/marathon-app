@@ -42,6 +42,16 @@ const ActivityStart = ({ navigation }) => {
       accuracy: Location.Accuracy.Highest,
       timeInterval: 5000,
       distanceInterval: 0,
+      showsBackgroundLocationIndicator: true,
+      foregroundService: {
+        notificationTitle: "Location Tracking",
+        notificationBody: "Tracking your location for routing purposes",
+        notificationColor: "#FF0000",
+      },
+      pausesUpdatesAutomatically: false,
+      deferredUpdatesInterval: 1000,
+      deferredUpdatesDistance: 0,
+      deferredUpdatesTimeout: 1000,
     });
     const hasStarted = await Location.hasStartedLocationUpdatesAsync(
       LOCATION_TRACKING
@@ -77,39 +87,39 @@ const ActivityStart = ({ navigation }) => {
     });
   };
 
-  //   const fetchCurrentLocation = async () => {
-  //     let { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== "granted") {
-  //       console.log("Permission to access location was denied");
-  //       return;
-  //     }
+  const fetchCurrentLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Permission to access location was denied");
+      return;
+    }
 
-  //     let location = await Location.getCurrentPositionAsync({});
+    let location = await Location.getCurrentPositionAsync({});
 
-  //     setCurrentLocation({
-  //       latitude: location.coords.latitude,
-  //       longitude: location.coords.longitude,
-  //     });
+    setCurrentLocation({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    });
 
-  //     map?.current?.getCamera().then((cam) => {
-  //       cam.center = {
-  //         latitude: location.coords.latitude,
-  //         longitude: location.coords.longitude,
-  //       };
-  //       cam.zoom = 16;
-  //       map?.current?.animateCamera(cam);
-  //     });
-  //   };
+    map?.current?.getCamera().then((cam) => {
+      cam.center = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+      cam.zoom = 16;
+      map?.current?.animateCamera(cam);
+    });
+  };
 
-  //   useEffect(() => {
-  //     fetchCurrentLocation();
-  //   }, []);
+  useEffect(() => {
+    fetchCurrentLocation();
+  }, []);
 
-  //   useEffect(() => {
-  //     if (markerRef.current && currentLocation.latitude) {
-  //       markerRef.current.animateMarkerToCoordinate(currentLocation, 200);
-  //     }
-  //   }, [currentLocation]);
+  useEffect(() => {
+    if (markerRef.current && currentLocation.latitude) {
+      markerRef.current.animateMarkerToCoordinate(currentLocation, 200);
+    }
+  }, [currentLocation]);
 
   return (
     <View
@@ -118,12 +128,12 @@ const ActivityStart = ({ navigation }) => {
         flex: 1,
       }}
     >
-      <TouchableOpacity onPress={startLocation}>
+      {/* <TouchableOpacity onPress={startLocation}>
         <Text>iuhuh</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={stopLocation}>
         <Text>iuhuh</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <View style={{ flex: 1, overflow: "hidden", position: "relative" }}>
         {/* {loading && <Text>Loading...</Text>} */}
         <MapView
@@ -163,7 +173,7 @@ const ActivityStart = ({ navigation }) => {
           />
         </MapView>
 
-        {/* <View
+        <View
           style={{
             // width: "100%",
             // height: 100,
@@ -175,7 +185,7 @@ const ActivityStart = ({ navigation }) => {
             position: "absolute",
           }}
         >
-          <TouchableOpacity
+          {/* <TouchableOpacity
             activeOpacity={0.8}
             onPress={fetchCurrentLocation}
             style={{
@@ -190,22 +200,71 @@ const ActivityStart = ({ navigation }) => {
             }}
           >
             <Text>L</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-evenly",
+              backgroundColor: "#fff",
+              borderRadius: 4,
+              elevation: 5,
+            }}
+          >
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={{
+                flex: 1,
+                padding: 16,
+                borderRightWidth: 1,
+                borderRightColor: "#0000001a",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#666",
+                  fontSize: 14,
+                  textAlign: "center",
+                  fontWeight: "700",
+                }}
+              >
+                Select Activity
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={{
+                flex: 1,
+                padding: 16,
+              }}
+            >
+              <Text
+                style={{
+                  color: "#666",
+                  fontSize: 14,
+                  textAlign: "center",
+                  fontWeight: "700",
+                }}
+              >
+                Select Workout
+              </Text>
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={fetchCurrentLocation}
+            onPress={startLocation}
             style={{
               width: "100%",
-              backgroundColor: "blue",
-              padding: 12,
-              borderRadius: 16,
+              backgroundColor: "#0064AD",
+              padding: 16,
+              borderRadius: 24,
               marginTop: 16,
             }}
           >
             <Text
               style={{
                 color: "#fff",
-                fontSize: 24,
+                fontSize: 16,
+                textTransform: "uppercase",
                 textAlign: "center",
                 fontWeight: "700",
               }}
@@ -213,7 +272,7 @@ const ActivityStart = ({ navigation }) => {
               Start
             </Text>
           </TouchableOpacity>
-        </View> */}
+        </View>
       </View>
     </View>
   );

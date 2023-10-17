@@ -84,10 +84,12 @@ export const verifyOTP = async (body) => {
   });
 };
 
-export const getEvents = async () => {
+export const getEvents = async (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const response = await client.get("/v1/events");
+      const response = await client.get(
+        `/v1/events${data && data?.type ? `?type=${data?.type}` : ""}`
+      );
       resolve(response.data);
     } catch (error) {
       reject(error);

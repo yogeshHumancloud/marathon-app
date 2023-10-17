@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Map from "../Screens/Map";
@@ -19,6 +19,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { deleteUser } from "../reduxToolkit/user/userSlice";
 import { deleteMarathon } from "../reduxToolkit/marathon/marathonSlice";
 import ActivityStart from "../Screens/ActivityStart";
+import MarathonList from "../Screens/MarathonList";
+import MarathonCategoryList from "../Screens/MarathonCategoryList";
+import MarathonDetails from "../Screens/MarathonDetails";
+import { AntDesign } from "@expo/vector-icons";
 const Tab = createBottomTabNavigator();
 
 const DashboardNavigator = ({ navigation }) => {
@@ -82,11 +86,22 @@ const DashboardNavigator = ({ navigation }) => {
                 flexDirection: "row",
               }}
             >
-              <Text
-                style={{ fontSize: 24, fontWeight: "500", color: "#0064AD" }}
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
               >
-                {route.name}
-              </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.goBack();
+                  }}
+                >
+                  <AntDesign name="arrowleft" size={24} color="#000" />
+                </TouchableOpacity>
+                <Text
+                  style={{ fontSize: 24, fontWeight: "500", color: "#0064AD" }}
+                >
+                  {route.name}
+                </Text>
+              </View>
               <Menu>
                 <MenuTrigger
                   children={
@@ -157,7 +172,7 @@ const DashboardNavigator = ({ navigation }) => {
         },
       })}
     >
-      <Tab.Screen name="Map" component={ActivityStart} />
+      <Tab.Screen name="Map" component={Map} />
       <Tab.Screen name="Leaderboard" component={Leaderboard} />
       <Tab.Screen name="Results" component={Results} />
     </Tab.Navigator>

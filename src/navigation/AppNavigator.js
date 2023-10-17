@@ -16,6 +16,15 @@ import OTPVerification from "../Screens/OTPVerification";
 import DashboardNavigator from "./DashboardNavigator";
 import Welcome from "../Screens/Welcome";
 import ChooseUser from "../Screens/ChooseUser";
+import MarathonCategoryList from "../Screens/MarathonCategoryList";
+import MarathonList from "../Screens/MarathonList";
+import MarathonDetails from "../Screens/MarathonDetails";
+import ActivityStart from "../Screens/ActivityStart";
+import { Text, TouchableOpacity, View } from "react-native";
+import Constants from "expo-constants";
+import MarathonNavigator from "./MarathonNavigator";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import ActivityNavigator from "./ActivityNavigator";
 
 const AuthStack = createNativeStackNavigator();
 const Auth = () => {
@@ -32,25 +41,109 @@ const Auth = () => {
   );
 };
 
-const MainStack = createNativeStackNavigator();
+// const MainStack = createNativeStackNavigator();
+const MainStack = createBottomTabNavigator();
 const Main = () => {
   const marathon = useSelector((store) => store.marathon);
   return (
     <MainStack.Navigator
-      initialRouteName={
-        marathon.marathon?.id !== undefined &&
-        marathon.marathon?.selectedType?.id !== undefined
-          ? "dashboard"
-          : "welcome"
-      }
-      screenOptions={{
-        headerShown: false,
-        animation: "slide_from_right",
+      // initialRouteName={
+      //   marathon.marathon?.id !== undefined &&
+      //   marathon.marathon?.selectedType?.id !== undefined
+      //     ? "dashboard"
+      //     : "welcome"
+      // }
+      initialRouteName="marathons"
+      screenOptions={({ route }) => {
+        return {
+          headerShown: false,
+          animation: "slide_from_right",
+          tabBarLabel: ({ focused, color }) => {
+            return (
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "700",
+                  color: focused ? "#0064AD" : "#AEAEAE",
+                  textTransform: "capitalize",
+                }}
+              >
+                {route.name}
+              </Text>
+            );
+          },
+
+          tabBarStyle: {
+            height: 64,
+          },
+          tabBarIcon: ({ focused, color, size }) => {
+            return null;
+          },
+          tabBarIconStyle: {
+            flex: 0,
+          },
+          tabBarItemStyle: {
+            justifyContent: "center",
+            marginHorizontal: 5,
+          },
+          tabBarActiveTintColor: "#FF9230",
+          tabBarInactiveTintColor: "#AEAEAE",
+          // header: ({ route }) => {
+          //   return (
+          //     <View
+          //       style={{
+          //         // height: 68,
+          //         paddingHorizontal: 16,
+          //         marginTop: Constants.statusBarHeight,
+          //         backgroundColor: "#fff",
+          //       }}
+          //     >
+          // {/* {route.name === "marathons" && (
+          //   <TouchableOpacity
+          //     onPress={() => {
+          //       console.log("back");
+          //     }}
+          //   >
+          //     <AntDesign name="arrowleft" size={24} color="#000" />
+          //   </TouchableOpacity>
+          // )} */}
+          //       <Text
+          //         style={{
+          //           fontSize: 24,
+          //           fontWeight: "700",
+          //           color: "#0064AD",
+          //           textTransform: "capitalize",
+          //         }}
+          //       >
+          //         {route.name}
+          //       </Text>
+          //     </View>
+          //   );
+          // },
+        };
       }}
     >
-      <MainStack.Screen name="welcome" component={Welcome} />
-      <MainStack.Screen name="choosetype" component={ChooseUser} />
-      <MainStack.Screen name="dashboard" component={DashboardNavigator} />
+      {/*  <MainStack.Screen name="choosetype" component={ChooseUser} />
+      <MainStack.Screen
+      name="marathoncategorylist"
+      component={MarathonCategoryList}
+      />
+      <MainStack.Screen name="marathonlist" component={MarathonList} />
+      <MainStack.Screen name="marathondetails" component={MarathonDetails} />
+      
+    <MainStack.Screen name="dashboard" component={DashboardNavigator} /> */}
+      <MainStack.Screen name="marathons" component={MarathonNavigator} />
+      <MainStack.Screen name="training" component={ActivityNavigator} />
+      <MainStack.Screen
+        name="choosetype"
+        component={ChooseUser}
+        options={{ tabBarButton: () => null, tabBarStyle: { display: "none" } }}
+      />
+      <MainStack.Screen
+        name="dashboard"
+        component={DashboardNavigator}
+        options={{ tabBarButton: () => null, tabBarStyle: { display: "none" } }}
+      />
     </MainStack.Navigator>
   );
 };
