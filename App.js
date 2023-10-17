@@ -11,6 +11,9 @@ import { PersistGate } from "redux-persist/integration/react";
 import Welcome from "./src/Screens/Welcome";
 import { MenuProvider } from "react-native-popup-menu";
 import ChooseUser from "./src/Screens/ChooseUser";
+import StopWatch from "./src/Screens/StopWatch";
+import SelectActivity from "./src/Screens/SelectActivity";
+import SelectWorkout from "./src/Screens/SelectWorkout";
 
 export default function App() {
   const [fontsLoaded, fontError] = Font.useFonts({
@@ -40,7 +43,10 @@ export default function App() {
             {/* <DashboardNavigator /> */}
             {/* <Welcome /> */}
             {/* <ChooseUser /> */}
-            <AppNavigator />
+            {/* <AppNavigator /> */}
+            {/* <StopWatch /> */}
+            <SelectActivity />
+            {/* <SelectWorkout /> */}
             <Toast />
           </View>
         </MenuProvider>
