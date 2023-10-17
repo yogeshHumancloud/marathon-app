@@ -45,8 +45,8 @@ export default function App() {
             {/* <ChooseUser /> */}
             {/* <AppNavigator /> */}
             {/* <StopWatch /> */}
-            {/* <SelectActivity /> */}
-            <SelectWorkout />
+            <SelectActivity />
+            {/* <SelectWorkout /> */}
             <Toast />
           </View>
         </MenuProvider>

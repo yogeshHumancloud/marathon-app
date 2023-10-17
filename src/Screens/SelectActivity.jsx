@@ -20,7 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Toast from "react-native-toast-message";
 import Constants from "expo-constants";
 import RunningSVG from "../assets/icons/RunningSVG";
-import WalkingSVG from "../assets/icons/walkingSVG";
+import WalkingSVG from "../assets/icons/WalkingSVG";
 import HikingSVG from "../assets/icons/HikingSVG";
 import SwimmingSVG from "../assets/icons/SwimmingSVG";
 import BicycleSVG from "../assets/icons/BicycleSVG";
@@ -69,7 +69,7 @@ const SelectActivity = ({ navigation }) => {
 
   return (
     <View style={styles.mainContainer}>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={() => {
           navigation.goBack();
         }}
@@ -77,7 +77,7 @@ const SelectActivity = ({ navigation }) => {
       >
         <AntDesign name="arrowleft" size={24} color="black" />
       </TouchableOpacity>
-      <Text style={styles.header}>Select Activity</Text>
+      <Text style={styles.header}>Select Activity</Text> */}
       {/* <View style={styles.mainActivityCont}></View> */}
       <View style={styles.activityContanier}>
         <TouchableOpacity style={styles.activityButton}>
@@ -127,26 +127,26 @@ const SelectActivity = ({ navigation }) => {
           </View>
         </TouchableOpacity>
       </View>
-      <View style={styles.buttonCont}>
+      {/* <View style={styles.buttonCont}>
         <TouchableOpacity style={styles.stopBUtton}>
           <Text style={styles.buttonText}>Add Routes</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
       {/* <Button color={"#0064AD"} label="Next" onPress={handleNext} /> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  activityContanier: {
-    //   height: 628,
-    // flex: 1,
-    width: "100%",
-    alignItems: "center",
-    backgroundColor: "#33333333",
-    paddingTop: 16,
-    paddingHorizontal: 16,
-  },
+  // activityContanier: {
+  //   //   height: 628,
+  //   flex: 1,
+  //   width: "100%",
+  //   alignItems: "center",
+  //   backgroundColor: "#F5F5F5",
+  //   paddingTop: 16,
+  //   paddingHorizontal: 16,
+  // },
   header: {
     fontSize: 24,
     fontWeight: "700",
@@ -163,7 +163,8 @@ const styles = StyleSheet.create({
     // paddingTop: 44,
     paddingBottom: 0,
     paddingTop: Constants.statusBarHeight,
-    backgroundColor: "#fff",
+    backgroundColor: "#F5F5F5",
+    paddingHorizontal: 16,
   },
   activityIcon: {
     flexDirection: "row",
@@ -175,11 +176,14 @@ const styles = StyleSheet.create({
     width: "100%",
     // height: 48,
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
     // marginTop: 6,
     marginBottom: 8,
     borderRadius: 4,
-    border: "1px solid rgba(51, 51, 51, 0.20)",
+    // border: "1px solid rgba(51, 51, 51, 0.20)",
+    borderWidth: 1,
+    borderRadius: 4,
+    borderColor: "#33333333",
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -192,7 +196,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   textwithSymbol: {
-    color: "#333",
+    color: "#666",
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "Open Sans",

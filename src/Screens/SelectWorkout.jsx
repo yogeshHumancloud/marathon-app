@@ -19,12 +19,6 @@ import { setMarathon } from "../reduxToolkit/marathon/marathonSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Toast from "react-native-toast-message";
 import Constants from "expo-constants";
-import RunningSVG from "../assets/icons/RunningSVG";
-import WalkingSVG from "../assets/icons/walkingSVG";
-import HikingSVG from "../assets/icons/HikingSVG";
-import SwimmingSVG from "../assets/icons/SwimmingSVG";
-import BicycleSVG from "../assets/icons/BicycleSVG";
-import OtherSVG from "./OtherSVG";
 
 const SelectWorkout = ({ navigation }) => {
   const dispatch = useDispatch();
