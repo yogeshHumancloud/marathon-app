@@ -174,16 +174,12 @@ const ActivityStart = ({ navigation }) => {
         </MapView>
 
         <View
-          style={{
+          style={
+            styles.main
             // width: "100%",
             // height: 100,
             // backgroundColor: "red",
-            bottom: 8,
-            left: 8,
-            right: 8,
-            zIndex: 100,
-            position: "absolute",
-          }}
+          }
         >
           {/* <TouchableOpacity
             activeOpacity={0.8}
@@ -201,34 +197,9 @@ const ActivityStart = ({ navigation }) => {
           >
             <Text>L</Text>
           </TouchableOpacity> */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-evenly",
-              backgroundColor: "#fff",
-              borderRadius: 4,
-              elevation: 5,
-            }}
-          >
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={{
-                flex: 1,
-                padding: 16,
-                borderRightWidth: 1,
-                borderRightColor: "#0000001a",
-              }}
-            >
-              <Text
-                style={{
-                  color: "#666",
-                  fontSize: 14,
-                  textAlign: "center",
-                  fontWeight: "700",
-                }}
-              >
-                Select Activity
-              </Text>
+          <View style={styles.mainCont}>
+            <TouchableOpacity activeOpacity={0.8} style={styles.mainBUtton}>
+              <Text style={styles.textActivityBUtton}>Select Activity</Text>
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.8}
@@ -237,40 +208,15 @@ const ActivityStart = ({ navigation }) => {
                 padding: 16,
               }}
             >
-              <Text
-                style={{
-                  color: "#666",
-                  fontSize: 14,
-                  textAlign: "center",
-                  fontWeight: "700",
-                }}
-              >
-                Select Workout
-              </Text>
+              <Text style={styles.mainTextBUtton}>Select Workout</Text>
             </TouchableOpacity>
           </View>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={startLocation}
-            style={{
-              width: "100%",
-              backgroundColor: "#0064AD",
-              padding: 16,
-              borderRadius: 24,
-              marginTop: 16,
-            }}
+            style={styles.startButtonText}
           >
-            <Text
-              style={{
-                color: "#fff",
-                fontSize: 16,
-                textTransform: "uppercase",
-                textAlign: "center",
-                fontWeight: "700",
-              }}
-            >
-              Start
-            </Text>
+            <Text style={styles.startText}>Start</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -280,4 +226,51 @@ const ActivityStart = ({ navigation }) => {
 
 export default ActivityStart;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  main: {
+    bottom: 8,
+    left: 8,
+    right: 8,
+    zIndex: 100,
+    position: "absolute",
+  },
+  mainCont: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    backgroundColor: "#fff",
+    borderRadius: 4,
+    elevation: 5,
+  },
+  mainBUtton: {
+    flex: 1,
+    padding: 16,
+    borderRightWidth: 1,
+    borderRightColor: "#0000001a",
+  },
+  textActivityBUtton: {
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "700",
+  },
+  mainTextBUtton: {
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "700",
+  },
+  startButtonText: {
+    width: "100%",
+    backgroundColor: "#0064AD",
+    padding: 16,
+    borderRadius: 24,
+    marginTop: 16,
+  },
+  startText: {
+    color: "#fff",
+    fontSize: 16,
+    textTransform: "uppercase",
+    textAlign: "center",
+    fontWeight: "700",
+  },
+});

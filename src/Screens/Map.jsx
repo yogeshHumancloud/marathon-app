@@ -204,32 +204,13 @@ const Map = ({ navigation }) => {
   }, [route, loading]);
 
   return (
-    <View
-      style={{
-        backgroundColor: "#fff",
-        flex: 1,
-        padding: 16,
-        paddingTop: 24,
-      }}
-    >
+    <View style={styles.cont}>
       {/* <Button
         label={"loguot"}
         onPress={() => dispatch(deleteUser())}
         width={50}
       /> */}
-      <View
-        style={{
-          width: "100%",
-          backgroundColor: "#fff",
-          borderWidth: 1,
-          borderColor: "#999999",
-          borderRadius: 3,
-          paddingVertical: 12,
-          paddingHorizontal: 16,
-          flexDirection: "row",
-          position: "relative",
-        }}
-      >
+      <View style={styles.mainCont}>
         <Ionicons name="search" size={24} color="#666666" />
         <TextInput
           onFocus={() => {
@@ -247,14 +228,7 @@ const Map = ({ navigation }) => {
         />
       </View>
 
-      <View
-        style={{
-          marginTop: 16,
-          flexDirection: "row",
-          flexWrap: "wrap",
-          gap: 8,
-        }}
-      >
+      <View style={styles.cardTitleCont}>
         {categories.map((cate, index) => (
           <TouchableOpacity
             key={index}
@@ -262,28 +236,28 @@ const Map = ({ navigation }) => {
             onPress={() => {
               setSelectedCategory(cate);
             }}
-            style={{
-              backgroundColor:
-                selectedCategory?.title === cate.title ? "#FF92301A" : "#fff",
-              alignSelf: "flex-start",
-              paddingVertical: 4,
-              paddingHorizontal: 8,
-              borderColor:
-                selectedCategory?.title === cate.title ? "#FF9230" : "#666666",
-              borderWidth: 1,
-              borderRadius: 24,
-            }}
-          >
-            <Text
-              style={{
-                color:
+            style={[
+              styles.cardTitleBUtton,
+              {
+                backgroundColor:
+                  selectedCategory?.title === cate.title ? "#FF92301A" : "#fff",
+                borderColor:
                   selectedCategory?.title === cate.title
                     ? "#FF9230"
                     : "#666666",
-                fontSize: 12,
-                fontWeight: "500",
-                textTransform: "uppercase",
-              }}
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.cardTitle,
+                {
+                  color:
+                    selectedCategory?.title === cate.title
+                      ? "#FF9230"
+                      : "#666666",
+                },
+              ]}
             >
               {cate.title}
             </Text>
@@ -345,59 +319,31 @@ const Map = ({ navigation }) => {
           )}
         </MapView>
         {loading && (
-          <View
-            style={{
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-              backgroundColor: "#0064AD1A",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
+          <View style={styles.activityIncCont}>
             <ActivityIndicator size="large" color="#000" />
           </View>
         )}
       </View>
       <View
-        style={{
-          display: isDropdownOpen ? "flex" : "none",
-          backgroundColor: "#fff",
-          elevation: 5,
-          top: 72,
-          right: 16,
-          left: 16,
-          maxHeight: 200,
-          position: "absolute",
-          padding: 16,
-        }}
+        style={[
+          styles.activCont,
+          {
+            display: isDropdownOpen ? "flex" : "none",
+          },
+        ]}
       >
         {searchLoading ? (
           <ActivityIndicator size={"small"}></ActivityIndicator>
         ) : searchResults.length === 0 ? (
-          <Text
-            style={{
-              textAlign: "center",
-              fontSize: 16,
-              verticalAlign: "middle",
-            }}
-          >
-            No search results found
-          </Text>
+          <Text style={styles.activityText}>No search results found</Text>
         ) : (
           [
             ...searchResults,
             ...searchResults,
             ...searchResults,
             ...searchResults,
-          ].map((result) => (
-            <TouchableOpacity
-              style={{
-                paddingVertical: 8,
-                borderBottomColor: "#999",
-                borderBottomWidth: 1,
-              }}
-            >
+          ].map((result,index) => (
+            <TouchableOpacity key={index} style={styles.activityBUtton}>
               <Text>
                 {result.bib_id} - {result.name}
               </Text>
@@ -411,4 +357,68 @@ const Map = ({ navigation }) => {
 
 export default Map;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  cont: {
+    backgroundColor: "#fff",
+    flex: 1,
+    padding: 16,
+    paddingTop: 24,
+  },
+  mainCont: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#999999",
+    borderRadius: 3,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    position: "relative",
+  },
+  cardTitleCont: {
+    marginTop: 16,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  cardTitleBUtton: {
+    alignSelf: "flex-start",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderRadius: 24,
+  },
+  cardTitle: {
+    fontSize: 12,
+    fontWeight: "500",
+    textTransform: "uppercase",
+  },
+  activityIncCont: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#0064AD1A",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  activCont: {
+    backgroundColor: "#fff",
+    elevation: 5,
+    top: 72,
+    right: 16,
+    left: 16,
+    maxHeight: 200,
+    position: "absolute",
+    padding: 16,
+  },
+  activityText: {
+    textAlign: "center",
+    fontSize: 16,
+    verticalAlign: "middle",
+  },
+  activityBUtton: {
+    paddingVertical: 8,
+    borderBottomColor: "#999",
+    borderBottomWidth: 1,
+  },
+});

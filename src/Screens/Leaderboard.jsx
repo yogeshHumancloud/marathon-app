@@ -40,26 +40,8 @@ const Leaderboard = ({ navigation }) => {
   }, [searchValue]);
 
   return (
-    <View
-      style={{
-        backgroundColor: "#fff",
-        flex: 1,
-        padding: 16,
-        paddingTop: 24,
-      }}
-    >
-      <View
-        style={{
-          width: "100%",
-          backgroundColor: "#fff",
-          borderWidth: 1,
-          borderColor: "#999999",
-          borderRadius: 3,
-          paddingVertical: 12,
-          paddingHorizontal: 16,
-          flexDirection: "row",
-        }}
-      >
+    <View style={styles.cont}>
+      <View style={styles.mainCont}>
         <Ionicons name="search" size={24} color="#666666" />
         <TextInput
           style={{ flex: 1, marginLeft: 10, fontSize: 16 }}
@@ -76,15 +58,7 @@ const Leaderboard = ({ navigation }) => {
         ) : bibs.length > 0 ? (
           bibs.map((bib, index) => <Card key={index} bib={bib} />)
         ) : (
-          <Text
-            style={{
-              textAlign: "center",
-              fontSize: 16,
-              color: "#000",
-            }}
-          >
-            No data found
-          </Text>
+          <Text style={styles.textCont}>No data found</Text>
         )}
       </ScrollView>
     </View>
@@ -93,4 +67,26 @@ const Leaderboard = ({ navigation }) => {
 
 export default Leaderboard;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  cont: {
+    backgroundColor: "#fff",
+    flex: 1,
+    padding: 16,
+    paddingTop: 24,
+  },
+  mainCont: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#999999",
+    borderRadius: 3,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+  },
+  textCont: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "#000",
+  },
+});

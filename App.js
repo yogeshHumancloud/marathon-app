@@ -14,6 +14,7 @@ import ChooseUser from "./src/Screens/ChooseUser";
 import StopWatch from "./src/Screens/StopWatch";
 import SelectActivity from "./src/Screens/SelectActivity";
 import SelectWorkout from "./src/Screens/SelectWorkout";
+import Map from "./src/Screens/Map";
 
 export default function App() {
   const [fontsLoaded, fontError] = Font.useFonts({
@@ -43,10 +44,11 @@ export default function App() {
             {/* <DashboardNavigator /> */}
             {/* <Welcome /> */}
             {/* <ChooseUser /> */}
-            {/* <AppNavigator /> */}
+            <AppNavigator />
             {/* <StopWatch /> */}
-            <SelectActivity />
+            {/* <SelectActivity /> */}
             {/* <SelectWorkout /> */}
+            {/* <Map /> */}
             <Toast />
           </View>
         </MenuProvider>

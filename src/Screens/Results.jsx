@@ -41,26 +41,8 @@ const Results = () => {
   }, [searchValue]);
 
   return (
-    <View
-      style={{
-        backgroundColor: "#fff",
-        flex: 1,
-        padding: 16,
-        paddingTop: 24,
-      }}
-    >
-      <View
-        style={{
-          width: "100%",
-          backgroundColor: "#fff",
-          borderWidth: 1,
-          borderColor: "#999999",
-          borderRadius: 3,
-          paddingVertical: 12,
-          paddingHorizontal: 16,
-          flexDirection: "row",
-        }}
-      >
+    <View style={styles.cont}>
+      <View style={styles.mainCont}>
         <Ionicons name="search" size={24} color="#666666" />
         <TextInput
           value={searchValue}
@@ -80,44 +62,13 @@ const Results = () => {
               <Card key={index} bib={bib} isResult={true} />
             ))
           ) : (
-            <Text
-              style={{
-                textAlign: "center",
-                fontSize: 16,
-                color: "#000",
-              }}
-            >
-              No data found
-            </Text>
+            <Text style={styles.textCont}>No data found</Text>
           )}
         </ScrollView>
       ) : (
-        <View
-          style={{
-            marginTop: 24,
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Text
-            style={{
-              color: "#0064AD",
-              fontSize: 16,
-              fontWeight: "700",
-              textAlign: "center",
-            }}
-          >
-            Coming Soon..
-          </Text>
-          <Text
-            style={{
-              color: "#666",
-              fontSize: 16,
-              marginTop: 8,
-              textAlign: "center",
-            }}
-          >
+        <View style={styles.commingSoonMainCont}>
+          <Text style={styles.commingSoonTextCont}>Coming Soon..</Text>
+          <Text style={styles.resultTextCont}>
             Results will be uploaded once the race {"\n"} concludes and tallies
             are done.
           </Text>
@@ -129,4 +80,44 @@ const Results = () => {
 
 export default Results;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  cont: {
+    backgroundColor: "#fff",
+    flex: 1,
+    padding: 16,
+    paddingTop: 24,
+  },
+  mainCont: {
+    width: "100%",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#999999",
+    borderRadius: 3,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+  },
+  textCont: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "#000",
+  },
+  commingSoonMainCont: {
+    marginTop: 24,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  commingSoonTextCont: {
+    color: "#0064AD",
+    fontSize: 16,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  resultTextCont: {
+    color: "#666",
+    fontSize: 16,
+    marginTop: 8,
+    textAlign: "center",
+  },
+});
