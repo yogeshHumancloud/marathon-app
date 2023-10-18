@@ -2,22 +2,8 @@ import React from "react";
 
 import { View, Text, StyleSheet } from "react-native";
 import { useState } from "react";
-import ActivityCard from "../components/common/ActivityCard";
-import EventCard from "../components/common/EventCard";
-import { FlatList } from "react-native";
-import { ImagesSource } from "../assets/images/images";
-import Button from "../components/common/Button";
-import Jogging from "../assets/icons/Jogging";
-import Hiking from "../assets/icons/Hiking";
-import Runner from "../assets/icons/Runner";
-import Bicycle from "../assets/icons/BicycleIcon";
 import { TouchableOpacity } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
-import { FontAwesome } from "@expo/vector-icons";
-import { Ionicons } from "@expo/vector-icons";
-import { setMarathon } from "../reduxToolkit/marathon/marathonSlice";
 import { useDispatch, useSelector } from "react-redux";
-import Toast from "react-native-toast-message";
 import Constants from "expo-constants";
 import RunningSVG from "../assets/icons/RunningSVG";
 import WalkingSVG from "../assets/icons/WalkingSVG";
@@ -25,114 +11,67 @@ import HikingSVG from "../assets/icons/HikingSVG";
 import SwimmingSVG from "../assets/icons/SwimmingSVG";
 import BicycleSVG from "../assets/icons/BicycleSVG";
 import OtherSVG from "./OtherSVG";
+import { setActivity } from "../reduxToolkit/activity/activitySlice";
+
+const activities = [
+  {
+    name: "Running",
+    icon: <RunningSVG />,
+  },
+  {
+    name: "Walking",
+    icon: <WalkingSVG />,
+  },
+  {
+    name: "Hiking",
+    icon: <HikingSVG />,
+  },
+  {
+    name: "Swimming",
+    icon: <SwimmingSVG />,
+  },
+  {
+    name: "Cycling",
+    icon: <BicycleSVG />,
+  },
+  {
+    name: "Other",
+    icon: <OtherSVG />,
+  },
+];
 
 const SelectActivity = ({ navigation }) => {
   const dispatch = useDispatch();
   const [selectedType, setSelectedType] = useState({});
-  const marathon = useSelector((store) => store.marathon);
-  // const [loading, setLoading] = useState(false);
-  // const [selectedActivity, setSelectedActivity] = useState("run");
-
-  const handleEventSelect = (id) => {
-    setSelectedType(id);
-  };
-
-  const renderItem = ({ item, index }) => {
-    return (
-      <EventCard
-        imageSource={item.imageSource}
-        text={item.text}
-        key={item.id}
-        id={item.id}
-        item={item}
-        onPress={handleEventSelect}
-        isSelected={item.id === selectedType?.id}
-      />
-    );
-  };
-
-  const handleNext = () => {
-    if (selectedType.id) {
-      dispatch(setMarathon({ ...marathon.marathon, selectedType }));
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "dashboard" }],
-      });
-    } else {
-      Toast.show({
-        type: "error",
-        text1: "Select option to continue",
-        position: "bottom",
-      });
-    }
-  };
+  const activityState = useSelector((store) => store.activity);
 
   return (
     <View style={styles.mainContainer}>
-      {/* <TouchableOpacity
-        onPress={() => {
-          navigation.goBack();
-        }}
-        style={styles.backButton}
-      >
-        <AntDesign name="arrowleft" size={24} color="black" />
-      </TouchableOpacity>
-      <Text style={styles.header}>Select Activity</Text> */}
-      {/* <View style={styles.mainActivityCont}></View> */}
-      <View style={styles.activityContanier}>
-        <TouchableOpacity style={styles.activityButton}>
-          <View style={styles.activityIcon}>
-            <RunningSVG />
-            <Text style={styles.textwithSymbol}>Running</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.activityContanier}>
-        <TouchableOpacity style={styles.activityButton}>
-          <View style={styles.activityIcon}>
-            <WalkingSVG />
-            <Text style={styles.textwithSymbol}>Walking</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.activityContanier}>
-        <TouchableOpacity style={styles.activityButton}>
-          <View style={styles.activityIcon}>
-            <HikingSVG />
-            <Text style={styles.textwithSymbol}>Hiking</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.activityContanier}>
-        <TouchableOpacity style={styles.activityButton}>
-          <View style={styles.activityIcon}>
-            <SwimmingSVG />
-            <Text style={styles.textwithSymbol}>Swimming</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.activityContanier}>
-        <TouchableOpacity style={styles.activityButton}>
-          <View style={styles.activityIcon}>
-            <BicycleSVG />
-            <Text style={styles.textwithSymbol}>Cycling</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.activityContanier}>
-        <TouchableOpacity style={styles.activityButton}>
-          <View style={styles.activityIcon}>
-            <OtherSVG />
-            <Text style={styles.textwithSymbol}>Others</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-      {/* <View style={styles.buttonCont}>
-        <TouchableOpacity style={styles.stopBUtton}>
-          <Text style={styles.buttonText}>Add Routes</Text>
-        </TouchableOpacity>
-      </View> */}
-      {/* <Button color={"#0064AD"} label="Next" onPress={handleNext} /> */}
+      {activities.map((activity) => (
+        <View style={styles.activityContanier}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={{
+              ...styles.activityButton,
+              ...(activity.name === activityState.activity?.name && {
+                backgroundColor: "#0064AD1A",
+                borderColor: "#0064AD66",
+              }),
+            }}
+            onPress={() => {
+              dispatch(
+                setActivity({ ...activityState.activity, name: activity.name })
+              );
+              navigation.navigate("activity");
+            }}
+          >
+            <View style={styles.activityIcon}>
+              {activity.icon}
+              <Text style={styles.textwithSymbol}>{activity.name}</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      ))}
     </View>
   );
 };

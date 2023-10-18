@@ -108,6 +108,28 @@ export const getEventData = async (data) => {
   });
 };
 
+export const getWorkoutList = async (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await client.get(`/v1/activity/workout`);
+      resolve(response.data);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+export const addActivity = async (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const response = await client.post(`/v1/activity`, data);
+      resolve(response.data);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 export const getEventBibs = async (body) => {
   return new Promise(async (resolve, reject) => {
     const queryParams = [];

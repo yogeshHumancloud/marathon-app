@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -312,10 +313,17 @@ const Map = ({ navigation }) => {
           {currentLocation.latitude && (
             <Marker.Animated
               ref={markerRef}
-              image={ImagesSource.Maps.marker}
+              // image={ImagesSource.Maps.marker}
               title="Current Location"
               coordinate={currentLocation}
-            />
+            >
+              <Image
+                source={ImagesSource.Maps.marker}
+                width={20}
+                height={20}
+                style={{ width: 60, height: 60 }}
+              />
+            </Marker.Animated>
           )}
         </MapView>
         {loading && (
@@ -342,7 +350,7 @@ const Map = ({ navigation }) => {
             ...searchResults,
             ...searchResults,
             ...searchResults,
-          ].map((result,index) => (
+          ].map((result, index) => (
             <TouchableOpacity key={index} style={styles.activityBUtton}>
               <Text>
                 {result.bib_id} - {result.name}

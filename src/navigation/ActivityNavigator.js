@@ -23,6 +23,10 @@ import ActivityStart from "../Screens/ActivityStart";
 import { Text, TouchableOpacity, View } from "react-native";
 import Constants from "expo-constants";
 import { AntDesign } from "@expo/vector-icons";
+import SelectActivity from "../Screens/SelectActivity";
+import SelectWorkout from "../Screens/SelectWorkout";
+import StopWatch from "../Screens/StopWatch";
+import ShareActivity from "../Screens/ShareActivity";
 
 const MainStack = createNativeStackNavigator();
 // const MainStack = createBottomTabNavigator();
@@ -38,7 +42,7 @@ const ActivityNavigator = ({ navigation }) => {
       // }
       screenOptions={{
         animation: "slide_from_right",
-        header: ({ route }) => {
+        header: ({ route, navigation }) => {
           return (
             <View
               style={{
@@ -51,6 +55,15 @@ const ActivityNavigator = ({ navigation }) => {
                 gap: 16,
               }}
             >
+              {route.name !== "activity" && (
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.goBack();
+                  }}
+                >
+                  <AntDesign name="arrowleft" size={24} color="#000" />
+                </TouchableOpacity>
+              )}
               <Text
                 style={{
                   fontSize: 24,
@@ -59,7 +72,9 @@ const ActivityNavigator = ({ navigation }) => {
                   textTransform: "capitalize",
                 }}
               >
-                {route.name}
+                {route.name === "activity" && "Activity"}
+                {route.name === "selectactivity" && "Select Activity"}
+                {route.name === "selectworkout" && "Select Workout"}
               </Text>
             </View>
           );
@@ -67,6 +82,10 @@ const ActivityNavigator = ({ navigation }) => {
       }}
     >
       <MainStack.Screen name="activity" component={ActivityStart} />
+      <MainStack.Screen name="selectactivity" component={SelectActivity} />
+      <MainStack.Screen name="selectworkout" component={SelectWorkout} />
+      <MainStack.Screen name="stopwatch" component={StopWatch} />
+      <MainStack.Screen name="shareactivity" component={ShareActivity} />
     </MainStack.Navigator>
   );
 };

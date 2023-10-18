@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -16,76 +17,34 @@ import MapView, {
 } from "react-native-maps";
 import { ImagesSource } from "../assets/images/images";
 import * as Location from "expo-location";
-import * as TaskManager from "expo-task-manager";
-const LOCATION_TRACKING = "location-tracking";
+import { useSelector } from "react-redux";
+
+import RunningSVG from "../assets/icons/RunningSVG";
+import WalkingSVG from "../assets/icons/WalkingSVG";
+import HikingSVG from "../assets/icons/HikingSVG";
+import SwimmingSVG from "../assets/icons/SwimmingSVG";
+import BicycleSVG from "../assets/icons/BicycleSVG";
+import OtherSVG from "./OtherSVG";
+
+const activities = {
+  Running: <RunningSVG />,
+
+  Walking: <WalkingSVG />,
+
+  Hiking: <HikingSVG />,
+
+  Swimming: <SwimmingSVG />,
+
+  Cycling: <BicycleSVG />,
+
+  Other: <OtherSVG />,
+};
 
 const ActivityStart = ({ navigation }) => {
   const map = useRef(null);
   const markerRef = useRef(null);
   const [currentLocation, setCurrentLocation] = useState({});
-
-  const [locationStarted, setLocationStarted] = useState(false);
-
-  const startLocationTracking = async () => {
-    await TaskManager.defineTask(
-      LOCATION_TRACKING,
-      ({ data: { locations }, error }) => {
-        if (error) {
-          // check `error.message` for more details.
-          return;
-        }
-        console.log("Received new locations", locations);
-      }
-    );
-
-    await Location.startLocationUpdatesAsync(LOCATION_TRACKING, {
-      accuracy: Location.Accuracy.Highest,
-      timeInterval: 5000,
-      distanceInterval: 0,
-      showsBackgroundLocationIndicator: true,
-      foregroundService: {
-        notificationTitle: "Location Tracking",
-        notificationBody: "Tracking your location for routing purposes",
-        notificationColor: "#FF0000",
-      },
-      pausesUpdatesAutomatically: false,
-      deferredUpdatesInterval: 1000,
-      deferredUpdatesDistance: 0,
-      deferredUpdatesTimeout: 1000,
-    });
-    const hasStarted = await Location.hasStartedLocationUpdatesAsync(
-      LOCATION_TRACKING
-    );
-    setLocationStarted(hasStarted);
-    console.log("tracking started?", hasStarted);
-  };
-
-  useEffect(() => {
-    const config = async () => {
-      let resf = await Location.requestForegroundPermissionsAsync();
-      let resb = await Location.requestBackgroundPermissionsAsync();
-      if (resf.status != "granted" && resb.status !== "granted") {
-        console.log("Permission to access location was denied");
-      } else {
-        console.log("Permission to access location granted");
-      }
-    };
-
-    config();
-  }, []);
-
-  const startLocation = () => {
-    startLocationTracking();
-  };
-
-  const stopLocation = () => {
-    setLocationStarted(false);
-    TaskManager.isTaskRegisteredAsync(LOCATION_TRACKING).then((tracking) => {
-      if (tracking) {
-        Location.stopLocationUpdatesAsync(LOCATION_TRACKING);
-      }
-    });
-  };
+  const activityState = useSelector((store) => store.activity);
 
   const fetchCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -163,14 +122,21 @@ const ActivityStart = ({ navigation }) => {
 
           <Marker.Animated
             ref={markerRef}
-            image={ImagesSource.Maps.marker}
+            // image={ImagesSource.Maps.marker}
             title="Current Location"
             coordinate={
               currentLocation.latitude
                 ? currentLocation
                 : { latitude: 12.174495, longitude: 60.614503 }
             }
-          />
+          >
+            <Image
+              source={ImagesSource.Maps.marker}
+              width={20}
+              height={20}
+              style={{ width: 60, height: 60 }}
+            />
+          </Marker.Animated>
         </MapView>
 
         <View
@@ -198,25 +164,63 @@ const ActivityStart = ({ navigation }) => {
             <Text>L</Text>
           </TouchableOpacity> */}
           <View style={styles.mainCont}>
-            <TouchableOpacity activeOpacity={0.8} style={styles.mainBUtton}>
-              <Text style={styles.textActivityBUtton}>Select Activity</Text>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.mainBUtton}
+              onPress={() => {
+                navigation.navigate("selectactivity");
+              }}
+            >
+              {activities[activityState.activity?.name]}
+              <Text style={styles.textActivityBUtton}>
+                {activityState.activity?.name
+                  ? activityState.activity?.name
+                  : "Select Activity"}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               activeOpacity={0.8}
+              onPress={() => {
+                navigation.navigate("selectworkout");
+              }}
               style={{
                 flex: 1,
                 padding: 16,
               }}
             >
-              <Text style={styles.mainTextBUtton}>Select Workout</Text>
+              <Text style={styles.mainTextBUtton}>
+                {activityState?.activity?.workout?.name
+                  ? activityState?.activity?.workout?.name
+                  : "Select Workout"}
+              </Text>
             </TouchableOpacity>
           </View>
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={startLocation}
+            onPress={() => {
+              if (currentLocation.latitude) {
+                navigation.navigate("stopwatch");
+                // navigation.reset({
+                //   index: 0,
+                //   routes: [
+                //     {
+                //       name: "shareactivity",
+                //       params: {
+                //         time: 435,
+                //         distance: 98,
+                //       },
+                //     },
+                //   ],
+                // });
+              } else {
+                fetchCurrentLocation();
+              }
+            }}
             style={styles.startButtonText}
           >
-            <Text style={styles.startText}>Start</Text>
+            <Text style={styles.startText}>
+              {currentLocation.latitude ? "Start" : "Turn on Location"}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -246,6 +250,10 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRightWidth: 1,
     borderRightColor: "#0000001a",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
   },
   textActivityBUtton: {
     color: "#666",

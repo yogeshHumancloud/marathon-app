@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { View, Text, StyleSheet } from "react-native";
 import { useState } from "react";
@@ -19,118 +19,70 @@ import { setMarathon } from "../reduxToolkit/marathon/marathonSlice";
 import { useDispatch, useSelector } from "react-redux";
 import Toast from "react-native-toast-message";
 import Constants from "expo-constants";
+import { getWorkoutList } from "../api";
+import { setActivity } from "../reduxToolkit/activity/activitySlice";
 
 const SelectWorkout = ({ navigation }) => {
   const dispatch = useDispatch();
   const [selectedType, setSelectedType] = useState({});
-  const marathon = useSelector((store) => store.marathon);
-  // const [loading, setLoading] = useState(false);
-  // const [selectedActivity, setSelectedActivity] = useState("run");
+  const activityState = useSelector((store) => store.activity);
+  const [workouts, setWorkouts] = useState([]);
 
-  const handleEventSelect = (id) => {
-    setSelectedType(id);
-  };
-
-  const renderItem = ({ item, index }) => {
-    return (
-      <EventCard
-        imageSource={item.imageSource}
-        text={item.text}
-        key={item.id}
-        id={item.id}
-        item={item}
-        onPress={handleEventSelect}
-        isSelected={item.id === selectedType?.id}
-      />
-    );
-  };
-
-  const handleNext = () => {
-    if (selectedType.id) {
-      dispatch(setMarathon({ ...marathon.marathon, selectedType }));
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "dashboard" }],
-      });
-    } else {
-      Toast.show({
-        type: "error",
-        text1: "Select option to continue",
-        position: "bottom",
-      });
-    }
-  };
+  useEffect(() => {
+    const fetchWorkouts = async () => {
+      const response = await getWorkoutList();
+      setWorkouts(response.data);
+    };
+    fetchWorkouts();
+  }, []);
 
   return (
     <View style={styles.mainContainer}>
-      <TouchableOpacity
-        onPress={() => {
-          navigation.goBack();
-        }}
-        style={styles.backButton}
-      >
-        <AntDesign name="arrowleft" size={24} color="black" />
-      </TouchableOpacity>
-      <Text style={styles.header}>Select Activity</Text>
-      {/* <View style={styles.mainActivityCont}></View> */}
       <View style={styles.activityContanier}>
-        <TouchableOpacity style={styles.activityButton}>
+        <TouchableOpacity
+          style={{
+            ...styles.activityButton,
+            ...(activityState.activity?.workout === null && {
+              backgroundColor: "#0064AD1A",
+              borderColor: "#0064AD66",
+            }),
+          }}
+          onPress={() => {
+            dispatch(setActivity({ ...activityState.activity, workout: null }));
+            navigation.navigate("activity");
+          }}
+        >
           <View style={styles.activityIcon}>
             <Text style={styles.textwithSymbol}>None</Text>
           </View>
         </TouchableOpacity>
       </View>
-      <View style={styles.activityContanier}>
-        <TouchableOpacity style={styles.activityButton}>
-          <View style={styles.activityIcon}>
-            <Text style={styles.textwithSymbol}>20 mins</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.activityContanier}>
-        <TouchableOpacity style={styles.activityButton}>
-          <View style={styles.activityIcon}>
-            <Text style={styles.textwithSymbol}>1 Km</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.activityContanier}>
-        <TouchableOpacity style={styles.activityButton}>
-          <View style={styles.activityIcon}>
-            <Text style={styles.textwithSymbol}>2 Km</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.activityContanier}>
-        <TouchableOpacity style={styles.activityButton}>
-          <View style={styles.activityIcon}>
-            <Text style={styles.textwithSymbol}>Long Distance</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.activityContanier}>
-        <TouchableOpacity style={styles.activityButton}>
-          <View style={styles.activityIcon}>
-            <Text style={styles.textwithSymbol}>Short Bursts</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-
-      {/* <Button color={"#0064AD"} label="Next" onPress={handleNext} /> */}
+      {workouts.map((workout) => (
+        <View style={styles.activityContanier}>
+          <TouchableOpacity
+            style={{
+              ...styles.activityButton,
+              ...(activityState.activity?.workout?.id === workout.id && {
+                backgroundColor: "#0064AD1A",
+                borderColor: "#0064AD66",
+              }),
+            }}
+            onPress={() => {
+              dispatch(setActivity({ ...activityState.activity, workout }));
+              navigation.navigate("activity");
+            }}
+          >
+            <View style={styles.activityIcon}>
+              <Text style={styles.textwithSymbol}>{workout.name}</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      ))}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  activityContanier: {
-    //   height: 628,
-    // flex: 1,
-    width: "100%",
-    alignItems: "center",
-    backgroundColor: "#33333333",
-    paddingTop: 16,
-    paddingHorizontal: 16,
-  },
   header: {
     fontSize: 24,
     fontWeight: "700",
@@ -147,7 +99,8 @@ const styles = StyleSheet.create({
     // paddingTop: 44,
     paddingBottom: 0,
     paddingTop: Constants.statusBarHeight,
-    backgroundColor: "#fff",
+    backgroundColor: "#F5F5F5",
+    paddingHorizontal: 16,
   },
   activityIcon: {
     flexDirection: "row",
@@ -159,12 +112,14 @@ const styles = StyleSheet.create({
     width: "100%",
     // height: 48,
     paddingVertical: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
     // marginTop: 6,
     marginBottom: 8,
     borderRadius: 4,
-    border: "1px solid rgba(51, 51, 51, 0.20)",
-
+    // border: "1px solid rgba(51, 51, 51, 0.20)",
+    borderWidth: 1,
+    borderRadius: 4,
+    borderColor: "#33333333",
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -172,7 +127,7 @@ const styles = StyleSheet.create({
     // flex: 1,
     width: "100%",
     alignItems: "center",
-    backgroundColor: "##33333333",
+    backgroundColor: "#33333333",
     paddingTop: 16,
     paddingHorizontal: 16,
   },
