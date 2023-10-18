@@ -64,8 +64,9 @@ const MarathonList = ({ navigation }) => {
             )}
           </View>
           <View style={{ marginTop: 16, flexDirection: "row", gap: 8 }}>
-            {events.live?.map((item) => (
+            {events.live?.map((itemk, index) => (
               <MarathonCard
+                key={index}
                 navigation={navigation}
                 marathon={item}
                 category="live"
@@ -101,8 +102,9 @@ const MarathonList = ({ navigation }) => {
             )}
           </View>
           <View style={{ marginTop: 16, flexDirection: "row", gap: 8 }}>
-            {events?.upcoming?.map((item) => (
+            {events?.upcoming?.map((item,index) => (
               <MarathonCard
+              key={index}
                 navigation={navigation}
                 marathon={item}
                 category="upcoming"
@@ -145,8 +147,9 @@ const MarathonList = ({ navigation }) => {
               marginBottom: 36,
             }}
           >
-            {events?.past?.map((item) => (
+            {events?.past?.map((item,index) => (
               <MarathonCard
+              key={index}
                 navigation={navigation}
                 marathon={item}
                 category="past"

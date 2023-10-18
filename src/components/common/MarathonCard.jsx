@@ -61,6 +61,7 @@ const MarathonCard = ({ marathon, navigation, category }) => {
           >
             {marathon.categories?.map((category, i) => (
               <View
+                key={i}
                 style={{
                   paddingHorizontal: 8,
                   paddingVertical: 2,
