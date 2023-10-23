@@ -7,6 +7,7 @@ import {
   Image,
   BackHandler,
   Alert,
+  AppState,
 } from "react-native";
 import { useState } from "react";
 import ActivityCard from "../components/common/ActivityCard";
@@ -69,28 +70,28 @@ const StopWatch = ({ navigation }) => {
   } = activityState.activity;
 
   // useEffect(() => {
-  //   // dispatch(deleteActivity());
-  //   console.log({
-  //     currentLocation,
-  //     routeTracker,
-  //     distance,
-  //     currentElapse,
-  //     isRunning,
-  //     startTime,
-  //     elapsedStartTime,
-  //     elapsedTime,
-  //     totalTime,
+  // // dispatch(deleteActivity());
+  // console.log({
+  // currentLocation,
+  // routeTracker: JSON.stringify(routeTracker),
+  // distance,
+  // currentElapse,
+  // isRunning,
+  // startTime,
+  // elapsedStartTime,
+  // elapsedTime,
+  // totalTime,
   //   });
   // }, [
-  //   currentLocation,
-  //   routeTracker,
-  //   distance,
-  //   currentElapse,
-  //   isRunning,
-  //   startTime,
-  //   elapsedStartTime,
-  //   elapsedTime,
-  //   totalTime,
+  // currentLocation,
+  // routeTracker,
+  // distance,
+  // currentElapse,
+  // isRunning,
+  // startTime,
+  // elapsedStartTime,
+  // elapsedTime,
+  // totalTime,
   // ]);
 
   // const [currentLocation, setCurrentLocation] = useState({});
@@ -155,8 +156,10 @@ const StopWatch = ({ navigation }) => {
         // tempArr[currentElapse] = elapsed;
         // return tempArr;
         // }
-        dispatch(setElapsedTime(elapsed));
-        dispatch(setTotalTime(1000));
+        if (AppState.currentState === "active") {
+          dispatch(setElapsedTime(elapsed));
+          dispatch(setTotalTime(1000));
+        }
       }, 1000);
     } else {
       clearInterval(interval);
@@ -252,26 +255,36 @@ const StopWatch = ({ navigation }) => {
     });
     navigation?.getParent().setOptions({ tabBarStyle: { display: "none" } });
 
-    BackHandler.addEventListener("hardwareBackPress", () => {
-      Alert.alert(
-        "Discard Activity",
-        "Are you sure you would like to discard the activity?",
-        [
-          {
-            text: "Cancel",
-            onPress: () => console.log("Cancel Pressed"),
-            style: "cancel",
-          },
-          {
-            text: "Delete",
-            onPress: () => {
-              navigation.goBack();
+    const backhandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        Alert.alert(
+          "Discard Activity",
+          "Are you sure you would like to discard the activity?",
+          [
+            {
+              text: "Cancel",
+              onPress: () => console.log("Cancel Pressed"),
+              style: "cancel",
             },
-          },
-        ]
-      );
-      return true;
-    });
+            {
+              text: "Delete",
+              onPress: () => {
+                stopLocation();
+                navigation
+                  ?.getParent()
+                  .setOptions({ tabBarStyle: { display: "flex" } });
+                navigation.goBack();
+              },
+            },
+          ]
+        );
+        return true;
+      }
+    );
+    return () => {
+      backhandler.remove();
+    };
   }, []);
 
   const startLocationTracking = async () => {
@@ -281,12 +294,12 @@ const StopWatch = ({ navigation }) => {
       await Location.stopLocationUpdatesAsync(LOCATION_TRACKING);
     }
 
-    const Update = await TaskManager.isTaskRegisteredAsync(
-      UPDATE_ACTIVITY_DATA
-    );
-    if (Update) {
-      await BackgroundFetch.unregisterTaskAsync(UPDATE_ACTIVITY_DATA);
-    }
+    // const Update = await TaskManager.isTaskRegisteredAsync(
+    //   UPDATE_ACTIVITY_DATA
+    // );
+    // if (Update) {
+    //   await BackgroundFetch.unregisterTaskAsync(UPDATE_ACTIVITY_DATA);
+    // }
 
     const consoleData = () => {
       const currentTime = new Date();
@@ -300,69 +313,43 @@ const StopWatch = ({ navigation }) => {
       // }
       dispatch(setElapsedTime(elapsed));
       dispatch(setTotalTime(1000));
-
-      console.log({
-        currentLocation,
-        routeTracker,
-        distance,
-        currentElapse,
-        isRunning,
-        startTime,
-        elapsedStartTime,
-        elapsedTime,
-        totalTime,
-      });
-
-      setInterval(() => {
-        console.log("INTERVAL", {
-          currentLocation,
-          routeTracker,
-          distance,
-          currentElapse,
-          isRunning,
-          startTime,
-          elapsedStartTime,
-          elapsedTime,
-          totalTime,
-        });
-      }, 1000);
     };
 
-    await TaskManager.defineTask(UPDATE_ACTIVITY_DATA, consoleData);
+    // await TaskManager.defineTask(UPDATE_ACTIVITY_DATA, consoleData);
 
-    const status = await BackgroundFetch.getStatusAsync();
+    // const status = await BackgroundFetch.getStatusAsync();
 
-    switch (status) {
-      case BackgroundFetch.BackgroundFetchStatus.Restricted:
-      case BackgroundFetch.BackgroundFetchStatus.Denied:
-        console.log("Background execution is disabled");
-        return;
+    // switch (status) {
+    //   case BackgroundFetch.BackgroundFetchStatus.Restricted:
+    //   case BackgroundFetch.BackgroundFetchStatus.Denied:
+    //     console.log("Background execution is disabled");
+    //     return;
 
-      default: {
-        console.debug("Background execution allowed");
+    //   default: {
+    //     console.debug("Background execution allowed");
 
-        let tasks = await TaskManager.getRegisteredTasksAsync();
+    //     let tasks = await TaskManager.getRegisteredTasksAsync();
 
-        if (tasks.find((f) => f.taskName === UPDATE_ACTIVITY_DATA) == null) {
-          console.log("Registering task");
-          await BackgroundFetch.registerTaskAsync(UPDATE_ACTIVITY_DATA, {
-            minimumInterval: 1,
-            startOnBoot: true,
-            stopOnTerminate: false,
-          });
+    //     if (tasks.find((f) => f.taskName === UPDATE_ACTIVITY_DATA) == null) {
+    //       console.log("Registering task");
+    //       await BackgroundFetch.registerTaskAsync(UPDATE_ACTIVITY_DATA, {
+    //         minimumInterval: 1,
+    //         startOnBoot: true,
+    //         stopOnTerminate: false,
+    //       });
 
-          tasks = await TaskManager.getRegisteredTasksAsync();
-          console.debug("Registered tasks", tasks);
-        } else {
-          console.log(
-            `Task ${UPDATE_ACTIVITY_DATA} already registered, skipping`
-          );
-        }
+    //       tasks = await TaskManager.getRegisteredTasksAsync();
+    //       console.debug("Registered tasks", tasks);
+    //     } else {
+    //       console.log(
+    //         `Task ${UPDATE_ACTIVITY_DATA} already registered, skipping`
+    //       );
+    //     }
 
-        // console.log("Setting interval to", 10);
-        // await BackgroundFetch.setMinimumIntervalAsync(10);
-      }
-    }
+    //     // console.log("Setting interval to", 10);
+    //     // await BackgroundFetch.setMinimumIntervalAsync(10);
+    //   }
+    // }
 
     await TaskManager.defineTask(
       LOCATION_TRACKING,
@@ -373,8 +360,56 @@ const StopWatch = ({ navigation }) => {
           return;
         }
         if (locations[0]?.coords) {
-          // console.log("Received new locations", locations[0]?.coords);
+          console.log("Received new locations", locations[0]?.coords);
           dispatch(setCurrentLocation(locations[0]?.coords));
+
+          if (AppState.currentState === "background" && isRunning) {
+            dispatch(
+              setRouteTracker({
+                latitude: locations[0]?.coords?.latitude,
+                longitude: locations[0]?.coords?.longitude,
+              })
+            );
+
+            const currentTime = new Date();
+            const elapsed = currentTime - new Date(elapsedStartTime);
+            dispatch(setElapsedTime(elapsed));
+            dispatch(setTotalTime(1000));
+
+            const currentRoute = routeTracker[currentElapse];
+            if (currentRoute) {
+              const prevcoords = currentRoute[currentRoute.length - 1];
+              const newcoords = {
+                latitude: locations[0]?.coords?.latitude,
+                longitude: locations[0]?.coords?.longitude,
+              };
+
+              if (prevcoords && newcoords) {
+                const R = 6371; // Earth's radius in kilometers
+
+                const lat1 = prevcoords.latitude;
+                const lon1 = prevcoords.longitude;
+                const lat2 = newcoords.latitude;
+                const lon2 = newcoords.longitude;
+
+                const dLat = (lat2 - lat1) * (Math.PI / 180);
+                const dLon = (lon2 - lon1) * (Math.PI / 180);
+
+                const a =
+                  Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(lat1 * (Math.PI / 180)) *
+                    Math.cos(lat2 * (Math.PI / 180)) *
+                    Math.sin(dLon / 2) *
+                    Math.sin(dLon / 2);
+
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                const distance = R * c * 1000; // Convert to meters
+
+                dispatch(setDistance(distance));
+              }
+            }
+          }
+          // // console.log(dispatch(setCurrentLocation(locations[0]?.coords)));
         }
       }
     );
