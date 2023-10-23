@@ -11,9 +11,7 @@
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.humancloud.marathon"
@@ -53,6 +51,6 @@
         }
       ]
     ],
-    "owner": "yvhumancloud"
+    "owner": "humancloud-marathon"
   }
 }
