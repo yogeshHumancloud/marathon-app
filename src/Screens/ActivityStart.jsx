@@ -17,7 +17,7 @@ import MapView, {
 } from "react-native-maps";
 import { ImagesSource } from "../assets/images/images";
 import * as Location from "expo-location";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import RunningSVG from "../assets/icons/RunningSVG";
 import WalkingSVG from "../assets/icons/WalkingSVG";
@@ -25,6 +25,9 @@ import HikingSVG from "../assets/icons/HikingSVG";
 import SwimmingSVG from "../assets/icons/SwimmingSVG";
 import BicycleSVG from "../assets/icons/BicycleSVG";
 import OtherSVG from "./OtherSVG";
+import * as TaskManager from "expo-task-manager";
+import { LOCATION_TRACKING } from "../constants";
+import { startNewActivity } from "../reduxToolkit/activity/activitySlice";
 
 const activities = {
   Running: <RunningSVG />,
@@ -45,6 +48,7 @@ const ActivityStart = ({ navigation }) => {
   const markerRef = useRef(null);
   const [currentLocation, setCurrentLocation] = useState({});
   const activityState = useSelector((store) => store.activity);
+  const dispatch = useDispatch();
 
   const fetchCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -53,7 +57,10 @@ const ActivityStart = ({ navigation }) => {
       return;
     }
 
-    let location = await Location.getCurrentPositionAsync({});
+    let location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.BestForNavigation,
+      maximumAge: 10000,
+    });
 
     setCurrentLocation({
       latitude: location.coords.latitude,
@@ -72,6 +79,28 @@ const ActivityStart = ({ navigation }) => {
 
   useEffect(() => {
     fetchCurrentLocation();
+    const currentLocationInterval = setInterval(() => {
+      fetchCurrentLocation();
+    }, 10000);
+
+    navigation?.getParent().setOptions({ tabBarStyle: { display: "flex" } });
+
+    return () => {
+      clearInterval(currentLocationInterval);
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchIsRunning = async () => {
+      const running = await TaskManager.isTaskRegisteredAsync(
+        LOCATION_TRACKING
+      );
+
+      if (running) {
+        navigation.navigate(`stopwatch`);
+      }
+    };
+    fetchIsRunning();
   }, []);
 
   useEffect(() => {
@@ -199,6 +228,7 @@ const ActivityStart = ({ navigation }) => {
             activeOpacity={0.8}
             onPress={() => {
               if (currentLocation.latitude) {
+                dispatch(startNewActivity());
                 navigation.navigate("stopwatch");
                 // navigation.reset({
                 //   index: 0,
@@ -219,7 +249,7 @@ const ActivityStart = ({ navigation }) => {
             style={styles.startButtonText}
           >
             <Text style={styles.startText}>
-              {currentLocation.latitude ? "Start" : "Turn on Location"}
+              {currentLocation.latitude ? "Start" : "Enable GPS"}
             </Text>
           </TouchableOpacity>
         </View>

@@ -1,6 +1,13 @@
 import React, { useEffect, useRef } from "react";
 
-import { View, Text, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  BackHandler,
+  Alert,
+} from "react-native";
 import { useState } from "react";
 import ActivityCard from "../components/common/ActivityCard";
 import EventCard from "../components/common/EventCard";
@@ -21,38 +28,90 @@ import MapView, {
 import { ImagesSource } from "../assets/images/images";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
+import * as BackgroundFetch from "expo-background-fetch";
 import { addActivity } from "../api";
-const LOCATION_TRACKING = "location-tracking";
+import { LOCATION_TRACKING, UPDATE_ACTIVITY_DATA } from "../constants";
+import {
+  deleteActivity,
+  setCurrentElapse,
+  setCurrentLocation,
+  setDistance,
+  setElapsedStartTime,
+  setElapsedTime,
+  setIsRunning,
+  setRouteTracker,
+  setTotalTime,
+  startNewActivity,
+} from "../reduxToolkit/activity/activitySlice";
 
 const StopWatch = ({ navigation }) => {
-  const dispatch = useDispatch();
-  const [selectedType, setSelectedType] = useState({});
   const activityState = useSelector((store) => store.activity);
+  const dispatch = useDispatch();
   const map = useRef(null);
   const markerRef = useRef(null);
-  const polylineref = useRef(null);
+  const polylineref = useRef(new Array());
   const [currentScreen, setCurrentScreen] = useState("watch");
-  const [currentLocation, setCurrentLocation] = useState({});
-  const [routeTracker, setRouteTracker] = useState([]);
-  const [distance, setDistance] = useState(0);
-
-  const [locationStarted, setLocationStarted] = useState(false);
   const [urlTile, setUrlTile] = useState(
     "https://tile.openstreetmap.de/{z}/{x}/{y}.png"
   );
+  const [locationStarted, setLocationStarted] = useState(false);
 
-  const [isRunning, setIsRunning] = useState(true);
-  const [startTime, setStartTime] = useState(new Date());
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const {
+    currentLocation,
+    routeTracker,
+    distance,
+    currentElapse,
+    isRunning,
+    startTime,
+    elapsedStartTime,
+    elapsedTime,
+    totalTime,
+  } = activityState.activity;
+
+  // useEffect(() => {
+  //   // dispatch(deleteActivity());
+  //   console.log({
+  //     currentLocation,
+  //     routeTracker,
+  //     distance,
+  //     currentElapse,
+  //     isRunning,
+  //     startTime,
+  //     elapsedStartTime,
+  //     elapsedTime,
+  //     totalTime,
+  //   });
+  // }, [
+  //   currentLocation,
+  //   routeTracker,
+  //   distance,
+  //   currentElapse,
+  //   isRunning,
+  //   startTime,
+  //   elapsedStartTime,
+  //   elapsedTime,
+  //   totalTime,
+  // ]);
+
+  // const [currentLocation, setCurrentLocation] = useState({});
+  // const [routeTracker, setRouteTracker] = useState([]);
+  // const [distance, setDistance] = useState(0);
+  // const [currentElapse, setCurrentElapse] = useState(0);
+  // const [isRunning, setIsRunning] = useState(true);
+  // const [startTime, setStartTime] = useState(new Date());
+  // const [elapsedStartTime, setElapsedStartTime] = useState(new Date());
+  // const [elapsedTime, setElapsedTime] = useState([]);
+  // const [totalTime, setTotalTime] = useState(0);
 
   const handleActivityStop = async () => {
     stopLocation();
     const data = {
       activity_type: activityState?.activity?.name,
-      duration: elapsedTime,
+      duration: totalTime,
       distance,
       start_time: startTime,
       end_time: new Date(),
+      elapsedTime,
       route: {
         start_point: routeTracker[0],
         end_point: routeTracker[routeTracker.length - 1],
@@ -64,14 +123,17 @@ const StopWatch = ({ navigation }) => {
     const response = await addActivity(data);
 
     if (response.workout) {
+      dispatch(deleteActivity());
       navigation.reset({
         index: 0,
         routes: [
           {
             name: "shareactivity",
+
             params: {
-              time: formatTime(elapsedTime),
+              time: formatTime(totalTime),
               distance,
+              average_pace: getAveragePace(),
             },
           },
         ],
@@ -80,24 +142,28 @@ const StopWatch = ({ navigation }) => {
   };
 
   useEffect(() => {
-    console.log(urlTile);
-  }, [urlTile]);
-
-  useEffect(() => {
     let interval;
 
     if (isRunning) {
       interval = setInterval(() => {
         const currentTime = new Date();
-        const elapsed = currentTime - startTime;
-        setElapsedTime(elapsed);
+
+        const elapsed = currentTime - new Date(elapsedStartTime);
+
+        // const tempArr = [...elapsedTime];
+        // console.log("tempArr", elapsed);
+        // tempArr[currentElapse] = elapsed;
+        // return tempArr;
+        // }
+        dispatch(setElapsedTime(elapsed));
+        dispatch(setTotalTime(1000));
       }, 1000);
     } else {
       clearInterval(interval);
     }
 
     return () => clearInterval(interval);
-  }, [isRunning, startTime]);
+  }, [isRunning, elapsedStartTime, currentElapse]);
 
   const formatTime = (milliseconds) => {
     const totalSeconds = Math.floor(milliseconds / 1000);
@@ -111,49 +177,52 @@ const StopWatch = ({ navigation }) => {
   };
 
   const getCurrentPace = () => {
-    if (startTime) {
+    if (startTime && isRunning) {
       const currentTime = new Date().getTime();
-      const elapsedTime = (currentTime - startTime) / 1000; // convert to seconds
+      const elapsedTime = (currentTime - new Date(startTime)) / 1000; // convert to seconds
       return (distance / elapsedTime).toFixed(2); // pace in km/s
     }
     return 0;
   };
 
   const getAveragePace = () => {
-    if (elapsedTime > 0) {
-      return ((distance / elapsedTime) * 1000).toFixed(2); // pace in km/s
+    if (totalTime > 0) {
+      return ((distance / totalTime) * 1000).toFixed(2); // pace in km/s
     }
     return 0;
   };
 
   function updateDistance() {
-    const prevcoords = routeTracker[routeTracker.length - 2];
-    const newcoords = routeTracker[routeTracker.length - 1];
+    const currentRoute = routeTracker[currentElapse];
+    if (currentRoute) {
+      const prevcoords = currentRoute[currentRoute.length - 2];
+      const newcoords = currentRoute[currentRoute.length - 1];
 
-    if (prevcoords && newcoords) {
-      const R = 6371; // Earth's radius in kilometers
+      if (prevcoords && newcoords) {
+        const R = 6371; // Earth's radius in kilometers
 
-      const lat1 = prevcoords.latitude;
-      const lon1 = prevcoords.longitude;
-      const lat2 = newcoords.latitude;
-      const lon2 = newcoords.longitude;
+        const lat1 = prevcoords.latitude;
+        const lon1 = prevcoords.longitude;
+        const lat2 = newcoords.latitude;
+        const lon2 = newcoords.longitude;
 
-      const dLat = (lat2 - lat1) * (Math.PI / 180);
-      const dLon = (lon2 - lon1) * (Math.PI / 180);
+        const dLat = (lat2 - lat1) * (Math.PI / 180);
+        const dLon = (lon2 - lon1) * (Math.PI / 180);
 
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * (Math.PI / 180)) *
-          Math.cos(lat2 * (Math.PI / 180)) *
-          Math.sin(dLon / 2) *
-          Math.sin(dLon / 2);
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(lat1 * (Math.PI / 180)) *
+            Math.cos(lat2 * (Math.PI / 180)) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
 
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const distance = R * c * 1000; // Convert to meters
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c * 1000; // Convert to meters
 
-      setDistance((prevState) => prevState + distance);
+        dispatch(setDistance(distance));
 
-      return distance;
+        return distance;
+      }
     }
   }
 
@@ -166,18 +235,135 @@ const StopWatch = ({ navigation }) => {
 
     let location = await Location.getCurrentPositionAsync({});
 
-    setCurrentLocation({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    });
+    dispatch(
+      setCurrentLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      })
+    );
+
+    startLocation();
   };
 
   useEffect(() => {
     fetchCurrentLocation();
+    navigation?.setOptions({
+      headerShown: false,
+    });
+    navigation?.getParent().setOptions({ tabBarStyle: { display: "none" } });
+
+    BackHandler.addEventListener("hardwareBackPress", () => {
+      Alert.alert(
+        "Discard Activity",
+        "Are you sure you would like to discard the activity?",
+        [
+          {
+            text: "Cancel",
+            onPress: () => console.log("Cancel Pressed"),
+            style: "cancel",
+          },
+          {
+            text: "Delete",
+            onPress: () => {
+              navigation.goBack();
+            },
+          },
+        ]
+      );
+      return true;
+    });
   }, []);
 
   const startLocationTracking = async () => {
-    stopLocation();
+    setLocationStarted(false);
+    const tracking = await TaskManager.isTaskRegisteredAsync(LOCATION_TRACKING);
+    if (tracking) {
+      await Location.stopLocationUpdatesAsync(LOCATION_TRACKING);
+    }
+
+    const Update = await TaskManager.isTaskRegisteredAsync(
+      UPDATE_ACTIVITY_DATA
+    );
+    if (Update) {
+      await BackgroundFetch.unregisterTaskAsync(UPDATE_ACTIVITY_DATA);
+    }
+
+    const consoleData = () => {
+      const currentTime = new Date();
+
+      const elapsed = currentTime - new Date(elapsedStartTime);
+
+      // const tempArr = [...elapsedTime];
+      // console.log("tempArr", elapsed);
+      // tempArr[currentElapse] = elapsed;
+      // return tempArr;
+      // }
+      dispatch(setElapsedTime(elapsed));
+      dispatch(setTotalTime(1000));
+
+      console.log({
+        currentLocation,
+        routeTracker,
+        distance,
+        currentElapse,
+        isRunning,
+        startTime,
+        elapsedStartTime,
+        elapsedTime,
+        totalTime,
+      });
+
+      setInterval(() => {
+        console.log("INTERVAL", {
+          currentLocation,
+          routeTracker,
+          distance,
+          currentElapse,
+          isRunning,
+          startTime,
+          elapsedStartTime,
+          elapsedTime,
+          totalTime,
+        });
+      }, 1000);
+    };
+
+    await TaskManager.defineTask(UPDATE_ACTIVITY_DATA, consoleData);
+
+    const status = await BackgroundFetch.getStatusAsync();
+
+    switch (status) {
+      case BackgroundFetch.BackgroundFetchStatus.Restricted:
+      case BackgroundFetch.BackgroundFetchStatus.Denied:
+        console.log("Background execution is disabled");
+        return;
+
+      default: {
+        console.debug("Background execution allowed");
+
+        let tasks = await TaskManager.getRegisteredTasksAsync();
+
+        if (tasks.find((f) => f.taskName === UPDATE_ACTIVITY_DATA) == null) {
+          console.log("Registering task");
+          await BackgroundFetch.registerTaskAsync(UPDATE_ACTIVITY_DATA, {
+            minimumInterval: 1,
+            startOnBoot: true,
+            stopOnTerminate: false,
+          });
+
+          tasks = await TaskManager.getRegisteredTasksAsync();
+          console.debug("Registered tasks", tasks);
+        } else {
+          console.log(
+            `Task ${UPDATE_ACTIVITY_DATA} already registered, skipping`
+          );
+        }
+
+        // console.log("Setting interval to", 10);
+        // await BackgroundFetch.setMinimumIntervalAsync(10);
+      }
+    }
+
     await TaskManager.defineTask(
       LOCATION_TRACKING,
       ({ data: { locations }, error }) => {
@@ -187,21 +373,21 @@ const StopWatch = ({ navigation }) => {
           return;
         }
         if (locations[0]?.coords) {
-          setCurrentLocation(locations[0]?.coords);
+          // console.log("Received new locations", locations[0]?.coords);
+          dispatch(setCurrentLocation(locations[0]?.coords));
         }
-        // console.log("Received new locations", locations[0]?.coords);
       }
     );
 
     await Location.startLocationUpdatesAsync(LOCATION_TRACKING, {
-      accuracy: Location.Accuracy.Highest,
+      accuracy: Location.Accuracy.BestForNavigation,
       timeInterval: 1000,
       distanceInterval: 0,
       showsBackgroundLocationIndicator: true,
       foregroundService: {
-        notificationTitle: "Location Tracking",
-        notificationBody: "Tracking your location for routing purposes",
-        notificationColor: "#FF0000",
+        notificationTitle: "Marathon",
+        notificationBody: "Marathon is tracking your activity",
+        notificationColor: "#0064AD",
       },
       pausesUpdatesAutomatically: false,
       deferredUpdatesInterval: 1000,
@@ -215,7 +401,7 @@ const StopWatch = ({ navigation }) => {
     console.log("tracking started?", hasStarted);
   };
 
-  const startLocation = () => {
+  const startLocation = async () => {
     startLocationTracking();
   };
 
@@ -244,14 +430,37 @@ const StopWatch = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    if (currentLocation.latitude) {
-      setRouteTracker((prevState) => [
-        ...prevState,
-        {
+    if (currentLocation.latitude && isRunning) {
+      // let tempArray = [...routeTracker];
+
+      // console.log("tempArray", tempArray);
+
+      // if (Array.isArray(tempArray[currentElapse])) {
+      //   tempArray[currentElapse] = [
+      //     ...tempArray[currentElapse],
+      // {
+      //   latitude: currentLocation.latitude,
+      //   longitude: currentLocation.longitude,
+      // },
+      //   ];
+      //   // tempArray[currentElapse]?.push({
+      //   //   latitude: currentLocation.latitude,
+      //   //   longitude: currentLocation.longitude,
+      //   // });
+      // } else {
+      //   tempArray[currentElapse] = [
+      //     {
+      //       latitude: currentLocation.latitude,
+      //       longitude: currentLocation.longitude,
+      //     },
+      //   ];
+      // }
+      dispatch(
+        setRouteTracker({
           latitude: currentLocation.latitude,
           longitude: currentLocation.longitude,
-        },
-      ]);
+        })
+      );
 
       if (markerRef.current) {
         markerRef.current.animateMarkerToCoordinate(currentLocation, 200);
@@ -267,22 +476,21 @@ const StopWatch = ({ navigation }) => {
         });
       }
     }
-  }, [currentLocation]);
+  }, [currentLocation, currentElapse, isRunning]);
 
   useEffect(() => {
-    polylineref.current?.setNativeProps({
-      coordinates: routeTracker,
-    });
+    if (isRunning) {
+      polylineref.current?.[currentElapse]?.setNativeProps({
+        coordinates: routeTracker[currentElapse],
+      });
 
-    updateDistance();
-  }, [routeTracker]);
+      updateDistance();
+    }
+  }, [routeTracker, currentElapse, isRunning]);
 
   useEffect(() => {
-    if (!isRunning) {
-      setStartTime(new Date() - elapsedTime);
-      stopLocation();
-    } else {
-      // startLocation()
+    if (isRunning) {
+      dispatch(setElapsedStartTime(new Date()?.toString()));
     }
   }, [isRunning]);
 
@@ -317,7 +525,7 @@ const StopWatch = ({ navigation }) => {
               <Text style={styles.textwithSymbol}>Time</Text>
             </View>
 
-            <Text style={styles.textwithSymbol}>{formatTime(elapsedTime)}</Text>
+            <Text style={styles.textwithSymbol}>{formatTime(totalTime)}</Text>
           </View>
           <View style={styles.stopWatchSubCont}>
             <View style={styles.timeWithIcon}>
@@ -329,16 +537,16 @@ const StopWatch = ({ navigation }) => {
               {`${(distance / 1000).toFixed(2)} KM`}
             </Text>
           </View>
-          <View style={styles.stopWatchSubCont}>
+          {/* <View style={styles.stopWatchSubCont}>
             <Text style={styles.textwithSymbol}>Calories</Text>
             <Text style={styles.textwithSymbol}>0.00</Text>
-          </View>
+          </View> */}
           <View style={styles.stopWatchSubCont}>
-            <Text style={styles.textwithSymbol}>Current Pace</Text>
+            <Text style={styles.textwithSymbol}>Current Speed</Text>
             <Text style={styles.textwithSymbol}>{getCurrentPace()}</Text>
           </View>
           <View style={styles.stopWatchSubCont}>
-            <Text style={styles.textwithSymbol}>Average Pace</Text>
+            <Text style={styles.textwithSymbol}>Average Speed</Text>
             <Text style={styles.textwithSymbol}>{getAveragePace()}</Text>
           </View>
         </View>
@@ -377,12 +585,20 @@ const StopWatch = ({ navigation }) => {
               zIndex={-1}
             />
 
-            <Polyline
-              ref={polylineref}
-              coordinates={routeTracker}
-              strokeColor={"#FF0000"}
-              strokeWidth={5}
-            />
+            {routeTracker?.map(
+              (route, index) =>
+                route.length > 0 && (
+                  <Polyline
+                    key={index}
+                    ref={(element) => {
+                      polylineref.current.push(element);
+                    }}
+                    coordinates={route}
+                    strokeColor={"#FF0000"}
+                    strokeWidth={5}
+                  />
+                )
+            )}
 
             <Marker.Animated
               anchor={{ x: 0.5, y: 0.5 }}
@@ -473,8 +689,24 @@ const StopWatch = ({ navigation }) => {
               activeOpacity={0.8}
               style={styles.stopBUtton}
               onPress={() => {
-                stopLocation();
-                handleActivityStop();
+                Alert.alert(
+                  "Stop Activity",
+                  "Are you sure you want to stop this activity?",
+                  [
+                    {
+                      text: "Cancel",
+                      onPress: () => console.log("Cancel Pressed"),
+                      style: "cancel",
+                    },
+                    {
+                      text: "Stop",
+                      onPress: () => {
+                        stopLocation();
+                        handleActivityStop();
+                      },
+                    },
+                  ]
+                );
               }}
             >
               <FontAwesome
@@ -490,9 +722,9 @@ const StopWatch = ({ navigation }) => {
               style={styles.pauseBUtton}
               onPress={() => {
                 if (!isRunning) {
-                  startLocation();
+                  dispatch(setCurrentElapse(1));
                 }
-                setIsRunning((prevState) => !prevState);
+                dispatch(setIsRunning());
               }}
             >
               <FontAwesome
@@ -530,7 +762,7 @@ const styles = StyleSheet.create({
     // alignItems: "flex-start",
     // paddingTop: 44,
     // paddingBottom: 0,
-    // paddingTop: Constants.statusBarHeight,
+    paddingTop: Constants.statusBarHeight,
     backgroundColor: "#fff",
   },
   timeWithIcon: {

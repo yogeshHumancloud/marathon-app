@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 import { View, Text, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native";
@@ -6,9 +6,16 @@ import { FontAwesome } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import ViewShot from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
+import Constants from "expo-constants";
 
 const ShareActivity = ({ navigation, route }) => {
   const viewShot = useRef(null);
+
+  useEffect(() => {
+    navigation?.setOptions({
+      headerShown: false,
+    });
+  }, []);
 
   return (
     <ViewShot
@@ -16,7 +23,7 @@ const ShareActivity = ({ navigation, route }) => {
       ref={viewShot}
       options={{ format: "jpg", quality: 0.9 }}
     >
-      <View style={styles.mainContainer}>
+      <View style={[styles.mainContainer, { paddingTop: 0 }]}>
         <View
           style={[
             styles.stopWatchContainer,
@@ -49,12 +56,12 @@ const ShareActivity = ({ navigation, route }) => {
                 {`${(route.params?.distance / 1000).toFixed(2)} KM`}
               </Text>
             </View>
-            <View style={styles.stopWatchSubCont}>
+            {/* <View style={styles.stopWatchSubCont}>
               <Text style={styles.textwithSymbol}>Calories</Text>
               <Text style={styles.textwithSymbol}>
                 {route.params?.calories}
               </Text>
-            </View>
+            </View> */}
             {/* <View style={styles.stopWatchSubCont}>
             <Text style={styles.textwithSymbol}>Current Pace</Text>
             <Text style={styles.textwithSymbol}>{getCurrentPace()}</Text>
@@ -67,7 +74,38 @@ const ShareActivity = ({ navigation, route }) => {
             </View>
           </View>
 
-          <View style={{ position: "absolute", bottom: 0, width: "100%" }}>
+          <View
+            style={{
+              position: "absolute",
+              bottom: 0,
+              width: "100%",
+              flexDirection: "row",
+              justifyContent: "space-evenly",
+            }}
+          >
+            <View style={[styles.buttonCont, { paddingHorizontal: 16 }]}>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={[
+                  styles.pauseBUtton,
+                  {
+                    backgroundColor: "transparent",
+                    borderColor: "#0064AD",
+                    borderWidth: 1,
+                  },
+                ]}
+                onPress={() => {
+                  navigation.reset({
+                    index: 0,
+                    routes: [{ name: "activity" }],
+                  });
+                }}
+              >
+                <Text style={[styles.buttonText, { color: "#0064AD" }]}>
+                  Go to Home
+                </Text>
+              </TouchableOpacity>
+            </View>
             <View style={[styles.buttonCont, { paddingHorizontal: 16 }]}>
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -118,7 +156,7 @@ const styles = StyleSheet.create({
     // alignItems: "flex-start",
     // paddingTop: 44,
     // paddingBottom: 0,
-    // paddingTop: Constants.statusBarHeight,
+    paddingTop: Constants.statusBarHeight,
     backgroundColor: "#fff",
   },
   timeWithIcon: {
@@ -149,7 +187,7 @@ const styles = StyleSheet.create({
     // justifyContent: "center",
     // backgroundColor: "black",
     backgroundColor: "transparent",
-    width: "100%",
+    // width: "100%",
     gap: 16,
     paddingBottom: 16,
     // position: "absolute",
@@ -171,7 +209,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     flexDirection: "row",
     justifyContent: "center",
-    flex: 1,
+    // flex: 1,
   },
   buttonText: {
     fontSize: 16,

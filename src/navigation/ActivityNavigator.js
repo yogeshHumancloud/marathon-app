@@ -42,6 +42,7 @@ const ActivityNavigator = ({ navigation }) => {
       // }
       screenOptions={{
         animation: "slide_from_right",
+
         header: ({ route, navigation }) => {
           return (
             <View

@@ -18,6 +18,8 @@ import { useDispatch, useSelector } from "react-redux";
 import Toast from "react-native-toast-message";
 import MarathonCard from "../components/common/MarathonCard";
 import { getEvents } from "../api";
+import * as TaskManager from "expo-task-manager";
+import { LOCATION_TRACKING } from "../constants";
 
 const MarathonList = ({ navigation }) => {
   const [events, setEvents] = useState([]);
@@ -28,6 +30,19 @@ const MarathonList = ({ navigation }) => {
       setEvents(response.data);
     };
     fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    const fetchIsRunning = async () => {
+      const running = await TaskManager.isTaskRegisteredAsync(
+        LOCATION_TRACKING
+      );
+
+      if (running) {
+        navigation.navigate(`training`);
+      }
+    };
+    fetchIsRunning();
   }, []);
 
   return (
@@ -102,9 +117,9 @@ const MarathonList = ({ navigation }) => {
             )}
           </View>
           <View style={{ marginTop: 16, flexDirection: "row", gap: 8 }}>
-            {events?.upcoming?.map((item,index) => (
+            {events?.upcoming?.map((item, index) => (
               <MarathonCard
-              key={index}
+                key={index}
                 navigation={navigation}
                 marathon={item}
                 category="upcoming"
@@ -147,9 +162,9 @@ const MarathonList = ({ navigation }) => {
               marginBottom: 36,
             }}
           >
-            {events?.past?.map((item,index) => (
+            {events?.past?.map((item, index) => (
               <MarathonCard
-              key={index}
+                key={index}
                 navigation={navigation}
                 marathon={item}
                 category="past"

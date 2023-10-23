@@ -23,7 +23,7 @@ const BasicText = ({
         letterSpacing,
         textDecorationLine,
         textAlign: align,
-        // ...style,
+        ...style,
       }}
     >
       {children}

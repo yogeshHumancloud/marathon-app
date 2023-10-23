@@ -1,5 +1,8 @@
-import React, { useContext, useEffect } from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  NavigationContainer,
+  getFocusedRouteNameFromRoute,
+} from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
@@ -25,6 +28,8 @@ import Constants from "expo-constants";
 import MarathonNavigator from "./MarathonNavigator";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import ActivityNavigator from "./ActivityNavigator";
+import * as TaskManager from "expo-task-manager";
+import { LOCATION_TRACKING } from "../constants";
 
 const AuthStack = createNativeStackNavigator();
 const Auth = () => {
@@ -43,8 +48,9 @@ const Auth = () => {
 
 // const MainStack = createNativeStackNavigator();
 const MainStack = createBottomTabNavigator();
-const Main = () => {
+const Main = ({ navigation }) => {
   const marathon = useSelector((store) => store.marathon);
+
   return (
     <MainStack.Navigator
       // initialRouteName={
@@ -53,7 +59,7 @@ const Main = () => {
       //     ? "dashboard"
       //     : "welcome"
       // }
-      initialRouteName="marathons"
+      initialRouteName={"marathons"}
       screenOptions={({ route }) => {
         return {
           headerShown: false,
@@ -137,12 +143,30 @@ const Main = () => {
       <MainStack.Screen
         name="choosetype"
         component={ChooseUser}
-        options={{ tabBarButton: () => null, tabBarStyle: { display: "none" } }}
+        options={{
+          tabBarButton: () => {
+            null;
+          },
+          tabBarStyle: {
+            display: "none",
+            tabBarStyle: {
+              height: 64,
+            },
+          },
+        }}
       />
       <MainStack.Screen
         name="dashboard"
         component={DashboardNavigator}
-        options={{ tabBarButton: () => null, tabBarStyle: { display: "none" } }}
+        options={{
+          tabBarButton: () => null,
+          tabBarStyle: {
+            display: "none",
+            tabBarStyle: {
+              height: 64,
+            },
+          },
+        }}
       />
     </MainStack.Navigator>
   );
