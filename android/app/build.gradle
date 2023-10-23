@@ -81,9 +81,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace 'com.surajhumancloud.marathon'
+    namespace 'com.humancloud.marathon'
     defaultConfig {
-        applicationId 'com.surajhumancloud.marathon'
+        applicationId 'com.humancloud.marathon'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

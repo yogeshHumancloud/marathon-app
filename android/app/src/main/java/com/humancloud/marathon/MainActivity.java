@@ -1,4 +1,4 @@
-package com.surajhumancloud.marathon;
+package com.humancloud.marathon;
 
 import android.os.Build;
 import android.os.Bundle;
