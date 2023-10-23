@@ -1,4 +1,4 @@
-package com.surajhumancloud.marathon;
+package com.humancloud.marathon;
 
 import android.app.Application;
 import android.content.res.Configuration;
