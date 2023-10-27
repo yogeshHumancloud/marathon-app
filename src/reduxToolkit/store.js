@@ -1,6 +1,7 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import userReducer from "./user/userSlice";
 import marathonReducer from "./marathon/marathonSlice";
+import activityReducer from "./activity/activitySlice";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -17,6 +18,7 @@ import {
 const rootReducer = combineReducers({
   user: userReducer,
   marathon: marathonReducer,
+  activity: activityReducer,
 });
 
 const persistConfig = {

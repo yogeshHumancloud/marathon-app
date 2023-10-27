@@ -5,6 +5,8 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Image,
+  BackHandler,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -16,100 +18,97 @@ import MapView, {
 } from "react-native-maps";
 import { ImagesSource } from "../assets/images/images";
 import * as Location from "expo-location";
+import { useDispatch, useSelector } from "react-redux";
+
+import RunningSVG from "../assets/icons/RunningSVG";
+import WalkingSVG from "../assets/icons/WalkingSVG";
+import HikingSVG from "../assets/icons/HikingSVG";
+import SwimmingSVG from "../assets/icons/SwimmingSVG";
+import BicycleSVG from "../assets/icons/BicycleSVG";
+import OtherSVG from "./OtherSVG";
 import * as TaskManager from "expo-task-manager";
-const LOCATION_TRACKING = "location-tracking";
+import { LOCATION_TRACKING } from "../constants";
+import { startNewActivity } from "../reduxToolkit/activity/activitySlice";
+
+const activities = {
+  Running: <RunningSVG />,
+
+  Walking: <WalkingSVG />,
+
+  Hiking: <HikingSVG />,
+
+  Swimming: <SwimmingSVG />,
+
+  Cycling: <BicycleSVG />,
+
+  Other: <OtherSVG />,
+};
 
 const ActivityStart = ({ navigation }) => {
   const map = useRef(null);
   const markerRef = useRef(null);
   const [currentLocation, setCurrentLocation] = useState({});
+  const activityState = useSelector((store) => store.activity);
+  const dispatch = useDispatch();
 
-  const [locationStarted, setLocationStarted] = useState(false);
+  const fetchCurrentLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      console.log("Permission to access location was denied");
+      return;
+    }
 
-  const startLocationTracking = async () => {
-    await TaskManager.defineTask(
-      LOCATION_TRACKING,
-      ({ data: { locations }, error }) => {
-        if (error) {
-          // check `error.message` for more details.
-          return;
-        }
-        console.log("Received new locations", locations);
-      }
-    );
-
-    await Location.startLocationUpdatesAsync(LOCATION_TRACKING, {
-      accuracy: Location.Accuracy.Highest,
-      timeInterval: 5000,
-      distanceInterval: 0,
+    let location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.BestForNavigation,
+      maximumAge: 10000,
     });
-    const hasStarted = await Location.hasStartedLocationUpdatesAsync(
-      LOCATION_TRACKING
-    );
-    setLocationStarted(hasStarted);
-    console.log("tracking started?", hasStarted);
+
+    setCurrentLocation({
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+    });
+
+    map?.current?.getCamera().then((cam) => {
+      cam.center = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+      cam.zoom = 16;
+      map?.current?.animateCamera(cam);
+    });
   };
 
   useEffect(() => {
-    const config = async () => {
-      let resf = await Location.requestForegroundPermissionsAsync();
-      let resb = await Location.requestBackgroundPermissionsAsync();
-      if (resf.status != "granted" && resb.status !== "granted") {
-        console.log("Permission to access location was denied");
-      } else {
-        console.log("Permission to access location granted");
-      }
-    };
+    fetchCurrentLocation();
+    const currentLocationInterval = setInterval(() => {
+      fetchCurrentLocation();
+    }, 10000);
 
-    config();
+    navigation?.getParent().setOptions({ tabBarStyle: { display: "flex" } });
+
+    return () => {
+      clearInterval(currentLocationInterval);
+    };
   }, []);
 
-  const startLocation = () => {
-    startLocationTracking();
-  };
+  useEffect(() => {
+    const fetchIsRunning = async () => {
+      const running = await TaskManager.isTaskRegisteredAsync(
+        LOCATION_TRACKING
+      );
 
-  const stopLocation = () => {
-    setLocationStarted(false);
-    TaskManager.isTaskRegisteredAsync(LOCATION_TRACKING).then((tracking) => {
-      if (tracking) {
-        Location.stopLocationUpdatesAsync(LOCATION_TRACKING);
+      if (running) {
+        navigation.navigate(`stopwatch`);
       }
-    });
-  };
+    };
+    fetchIsRunning();
+  }, []);
 
-  //   const fetchCurrentLocation = async () => {
-  //     let { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== "granted") {
-  //       console.log("Permission to access location was denied");
-  //       return;
-  //     }
-
-  //     let location = await Location.getCurrentPositionAsync({});
-
-  //     setCurrentLocation({
-  //       latitude: location.coords.latitude,
-  //       longitude: location.coords.longitude,
-  //     });
-
-  //     map?.current?.getCamera().then((cam) => {
-  //       cam.center = {
-  //         latitude: location.coords.latitude,
-  //         longitude: location.coords.longitude,
-  //       };
-  //       cam.zoom = 16;
-  //       map?.current?.animateCamera(cam);
-  //     });
-  //   };
-
-  //   useEffect(() => {
-  //     fetchCurrentLocation();
-  //   }, []);
-
-  //   useEffect(() => {
-  //     if (markerRef.current && currentLocation.latitude) {
-  //       markerRef.current.animateMarkerToCoordinate(currentLocation, 200);
-  //     }
-  //   }, [currentLocation]);
+  useEffect(() => {
+    if (markerRef.current && currentLocation.latitude) {
+      markerRef.current.animateMarkerToCoordinate(currentLocation, 200);
+    }
+  }, [currentLocation]);
 
   return (
     <View
@@ -118,12 +117,12 @@ const ActivityStart = ({ navigation }) => {
         flex: 1,
       }}
     >
-      <TouchableOpacity onPress={startLocation}>
+      {/* <TouchableOpacity onPress={startLocation}>
         <Text>iuhuh</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={stopLocation}>
         <Text>iuhuh</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <View style={{ flex: 1, overflow: "hidden", position: "relative" }}>
         {/* {loading && <Text>Loading...</Text>} */}
         <MapView
@@ -153,29 +152,32 @@ const ActivityStart = ({ navigation }) => {
 
           <Marker.Animated
             ref={markerRef}
-            image={ImagesSource.Maps.marker}
+            // image={ImagesSource.Maps.marker}
             title="Current Location"
             coordinate={
               currentLocation.latitude
                 ? currentLocation
                 : { latitude: 12.174495, longitude: 60.614503 }
             }
-          />
+          >
+            <Image
+              source={ImagesSource.Maps.marker}
+              width={20}
+              height={20}
+              style={{ width: 60, height: 60 }}
+            />
+          </Marker.Animated>
         </MapView>
 
-        {/* <View
-          style={{
+        <View
+          style={
+            styles.main
             // width: "100%",
             // height: 100,
             // backgroundColor: "red",
-            bottom: 8,
-            left: 8,
-            right: 8,
-            zIndex: 100,
-            position: "absolute",
-          }}
+          }
         >
-          <TouchableOpacity
+          {/* <TouchableOpacity
             activeOpacity={0.8}
             onPress={fetchCurrentLocation}
             style={{
@@ -190,30 +192,68 @@ const ActivityStart = ({ navigation }) => {
             }}
           >
             <Text>L</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={fetchCurrentLocation}
-            style={{
-              width: "100%",
-              backgroundColor: "blue",
-              padding: 12,
-              borderRadius: 16,
-              marginTop: 16,
-            }}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontSize: 24,
-                textAlign: "center",
-                fontWeight: "700",
+          </TouchableOpacity> */}
+          <View style={styles.mainCont}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.mainBUtton}
+              onPress={() => {
+                navigation.navigate("selectactivity");
               }}
             >
-              Start
+              {activities[activityState.activity?.name]}
+              <Text style={styles.textActivityBUtton}>
+                {activityState.activity?.name
+                  ? activityState.activity?.name
+                  : "Select Activity"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => {
+                navigation.navigate("selectworkout");
+              }}
+              style={{
+                flex: 1,
+                padding: 16,
+              }}
+            >
+              <Text style={styles.mainTextBUtton}>
+                {activityState?.activity?.workout?.name
+                  ? activityState?.activity?.workout?.name
+                  : "Select Workout"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => {
+              if (currentLocation.latitude) {
+                dispatch(startNewActivity());
+                navigation.navigate("stopwatch");
+                // navigation.reset({
+                //   index: 0,
+                //   routes: [
+                //     {
+                //       name: "shareactivity",
+                //       params: {
+                //         time: 435,
+                //         distance: 98,
+                //       },
+                //     },
+                //   ],
+                // });
+              } else {
+                fetchCurrentLocation();
+              }
+            }}
+            style={styles.startButtonText}
+          >
+            <Text style={styles.startText}>
+              {currentLocation.latitude ? "Start" : "Enable GPS"}
             </Text>
           </TouchableOpacity>
-        </View> */}
+        </View>
       </View>
     </View>
   );
@@ -221,4 +261,55 @@ const ActivityStart = ({ navigation }) => {
 
 export default ActivityStart;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  main: {
+    bottom: 8,
+    left: 8,
+    right: 8,
+    zIndex: 100,
+    position: "absolute",
+  },
+  mainCont: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    backgroundColor: "#fff",
+    borderRadius: 4,
+    elevation: 5,
+  },
+  mainBUtton: {
+    flex: 1,
+    padding: 16,
+    borderRightWidth: 1,
+    borderRightColor: "#0000001a",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+  },
+  textActivityBUtton: {
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "700",
+  },
+  mainTextBUtton: {
+    color: "#666",
+    fontSize: 14,
+    textAlign: "center",
+    fontWeight: "700",
+  },
+  startButtonText: {
+    width: "100%",
+    backgroundColor: "#0064AD",
+    padding: 16,
+    borderRadius: 24,
+    marginTop: 16,
+  },
+  startText: {
+    color: "#fff",
+    fontSize: 16,
+    textTransform: "uppercase",
+    textAlign: "center",
+    fontWeight: "700",
+  },
+});

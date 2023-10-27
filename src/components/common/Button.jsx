@@ -39,19 +39,23 @@ const Button = ({
           backgroundColor: currentColor,
           borderColor,
           borderWidth,
+          gap: 8,
           ...styles.buttonInner,
         }}
       >
+        {isLoading && <ActivityIndicator color={"#fff"} />}
         <Body
           align="center"
           color={labelStyle?.color ?? "white"}
-          // style={{
-          //   fontFamily: labelStyle?.fontFamily ?? Font.MONTSERRAT,
-          //   fontSize: labelStyle?.fontSize ?? 16,
-          // }}
+          style={
+            {
+              // fontFamily: labelStyle?.fontFamily ?? Font.MONTSERRAT,
+              // fontSize: labelStyle?.fontSize ?? 16,
+            }
+          }
           letterSpacing={labelStyle?.letterSpacing ?? 2}
         >
-          {isLoading && <ActivityIndicator color={"#fff"} />} {label}
+          {label}
         </Body>
       </View>
     </AnimatedPressable>
