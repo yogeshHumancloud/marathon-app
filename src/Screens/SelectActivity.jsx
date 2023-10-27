@@ -1,6 +1,6 @@
 import React from "react";
 
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, FlatList } from "react-native";
 import { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,16 +23,16 @@ const activities = [
     icon: <WalkingSVG />,
   },
   {
-    name: "Hiking",
-    icon: <HikingSVG />,
-  },
-  {
     name: "Swimming",
     icon: <SwimmingSVG />,
   },
   {
     name: "Cycling",
     icon: <BicycleSVG />,
+  },
+  {
+    name: "Hiking",
+    icon: <HikingSVG />,
   },
   {
     name: "Other",
@@ -47,7 +47,7 @@ const SelectActivity = ({ navigation }) => {
 
   return (
     <View style={styles.mainContainer}>
-      {activities.map((activity) => (
+      {/* {activities.map((activity) => (
         <View style={styles.activityContanier}>
           <TouchableOpacity
             activeOpacity={0.8}
@@ -71,7 +71,36 @@ const SelectActivity = ({ navigation }) => {
             </View>
           </TouchableOpacity>
         </View>
-      ))}
+      ))} */}
+
+      <FlatList
+        data={activities}
+        renderItem={({ item }) => (
+          <View style={styles.activityContanier}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={{
+                ...styles.activityButton,
+                ...(item.name === activityState.activity?.name && {
+                  backgroundColor: "#0064AD1A",
+                  borderColor: "#0064AD66",
+                }),
+              }}
+              onPress={() => {
+                dispatch(
+                  setActivity({ ...activityState.activity, name: item.name })
+                );
+                navigation.navigate("activity");
+              }}
+            >
+              <View style={styles.activityIcon}>
+                {item.icon}
+                <Text style={styles.textwithSymbol}>{item.name}</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+      ></FlatList>
     </View>
   );
 };

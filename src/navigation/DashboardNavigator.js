@@ -140,7 +140,7 @@ const DashboardNavigator = ({ navigation }) => {
                       dispatch(deleteMarathon());
                       navigation.reset({
                         index: 0,
-                        routes: [{ name: "welcome" }],
+                        routes: [{ name: "marathons" }],
                       });
                     }}
                     text="Change Event"

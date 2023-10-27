@@ -8,6 +8,9 @@ import {
   BackHandler,
   Alert,
   AppState,
+  Vibration,
+  ScrollView,
+  FlatList,
 } from "react-native";
 import { useState } from "react";
 import ActivityCard from "../components/common/ActivityCard";
@@ -94,6 +97,10 @@ const StopWatch = ({ navigation }) => {
   // totalTime,
   // ]);
 
+  // useEffect(() => {
+  //   console.log(activityState.activity.workout);
+  // }, [activityState]);
+
   // const [currentLocation, setCurrentLocation] = useState({});
   // const [routeTracker, setRouteTracker] = useState([]);
   // const [distance, setDistance] = useState(0);
@@ -103,11 +110,15 @@ const StopWatch = ({ navigation }) => {
   // const [elapsedStartTime, setElapsedStartTime] = useState(new Date());
   // const [elapsedTime, setElapsedTime] = useState([]);
   // const [totalTime, setTotalTime] = useState(0);
+  const [workoutData, setWorkoutData] = useState([]);
 
   const handleActivityStop = async () => {
     stopLocation();
     const data = {
       activity_type: activityState?.activity?.name,
+      ...(activityState?.activity?.workout?.id
+        ? { workout: activityState.activity.workout.id }
+        : {}),
       duration: totalTime,
       distance,
       start_time: startTime,
@@ -147,16 +158,16 @@ const StopWatch = ({ navigation }) => {
 
     if (isRunning) {
       interval = setInterval(() => {
-        const currentTime = new Date();
-
-        const elapsed = currentTime - new Date(elapsedStartTime);
-
-        // const tempArr = [...elapsedTime];
-        // console.log("tempArr", elapsed);
-        // tempArr[currentElapse] = elapsed;
-        // return tempArr;
-        // }
         if (AppState.currentState === "active") {
+          const currentTime = new Date();
+
+          const elapsed = currentTime - new Date(elapsedStartTime);
+
+          // const tempArr = [...elapsedTime];
+          // console.log("tempArr", elapsed);
+          // tempArr[currentElapse] = elapsed;
+          // return tempArr;
+          // }
           dispatch(setElapsedTime(elapsed));
           dispatch(setTotalTime(1000));
         }
@@ -166,7 +177,7 @@ const StopWatch = ({ navigation }) => {
     }
 
     return () => clearInterval(interval);
-  }, [isRunning, elapsedStartTime, currentElapse]);
+  }, [isRunning, elapsedStartTime]);
 
   const formatTime = (milliseconds) => {
     const totalSeconds = Math.floor(milliseconds / 1000);
@@ -360,7 +371,7 @@ const StopWatch = ({ navigation }) => {
           return;
         }
         if (locations[0]?.coords) {
-          console.log("Received new locations", locations[0]?.coords);
+          // console.log("Received new locations", locations[0]?.coords);
           dispatch(setCurrentLocation(locations[0]?.coords));
 
           if (AppState.currentState === "background" && isRunning) {
@@ -437,10 +448,12 @@ const StopWatch = ({ navigation }) => {
   };
 
   const startLocation = async () => {
+    Vibration.vibrate(1000);
     startLocationTracking();
   };
 
   const stopLocation = () => {
+    Vibration.vibrate(1000);
     setLocationStarted(false);
     TaskManager.isTaskRegisteredAsync(LOCATION_TRACKING).then((tracking) => {
       if (tracking) {
@@ -469,7 +482,6 @@ const StopWatch = ({ navigation }) => {
       // let tempArray = [...routeTracker];
 
       // console.log("tempArray", tempArray);
-
       // if (Array.isArray(tempArray[currentElapse])) {
       //   tempArray[currentElapse] = [
       //     ...tempArray[currentElapse],
@@ -524,10 +536,92 @@ const StopWatch = ({ navigation }) => {
   }, [routeTracker, currentElapse, isRunning]);
 
   useEffect(() => {
+    if (workoutData?.length > 0) {
+      if (currentElapse === workoutData?.length - 1) {
+        Vibration.vibrate(1000);
+        stopLocation();
+        handleActivityStop();
+      }
+      if (
+        elapsedTime[currentElapse] / 1000 >
+        workoutData[currentElapse]?.duration
+      ) {
+        dispatch(setElapsedStartTime(new Date()?.toString()));
+        dispatch(setCurrentElapse(1));
+      }
+
+      if (
+        calculateDistance(routeTracker[currentElapse]) >
+        workoutData[currentElapse]?.distance
+      ) {
+        dispatch(setElapsedStartTime(new Date()?.toString()));
+        dispatch(setCurrentElapse(1));
+      }
+    }
+  }, [elapsedTime, workoutData]);
+
+  useEffect(() => {
     if (isRunning) {
       dispatch(setElapsedStartTime(new Date()?.toString()));
     }
   }, [isRunning]);
+
+  useEffect(() => {
+    if (activityState?.activity?.workout) {
+      const workout = activityState?.activity?.workout;
+      setWorkoutData([
+        // {
+        //   duration: workout?.warm_up ? workout?.warm_up : 0,
+        //   step_name: "Warm Up",
+        // },
+        ...repeatArray(workout?.steps, workout?.repetations + 1),
+        {
+          duration: workout?.cool_down ? workout?.cool_down : 0,
+          step_name: "Cool Down",
+        },
+      ]);
+    }
+  }, [activityState?.activity?.workout]);
+
+  const repeatArray = (arr, n) =>
+    Array.from({ length: arr?.length * n }, (_, i) => arr[i % arr?.length]);
+
+  const calculateDistance = (data) => {
+    const distance = data?.map((rt, index) => {
+      const prevcoords = data[index - 1];
+      const newcoords = rt;
+
+      if (prevcoords && newcoords) {
+        const R = 6371; // Earth's radius in kilometers
+
+        const lat1 = prevcoords.latitude;
+        const lon1 = prevcoords.longitude;
+        const lat2 = newcoords.latitude;
+        const lon2 = newcoords.longitude;
+
+        const dLat = (lat2 - lat1) * (Math.PI / 180);
+        const dLon = (lon2 - lon1) * (Math.PI / 180);
+
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(lat1 * (Math.PI / 180)) *
+            Math.cos(lat2 * (Math.PI / 180)) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c * 1000; // Convert to meters
+
+        // dispatch(setDistance(distance));
+
+        return distance;
+      }
+    });
+
+    return distance
+      ? distance.reduce((partialSum, a) => (a ? partialSum + a : 0), 0)
+      : 0;
+  };
 
   return (
     <View style={styles.mainContainer}>
@@ -552,6 +646,7 @@ const StopWatch = ({ navigation }) => {
           style={{
             display: currentScreen === "map" ? "none" : "flex",
             width: "100%",
+            flex: 1,
           }}
         >
           <View style={styles.stopWatchSubCont}>
@@ -560,7 +655,9 @@ const StopWatch = ({ navigation }) => {
               <Text style={styles.textwithSymbol}>Time</Text>
             </View>
 
-            <Text style={styles.textwithSymbol}>{formatTime(totalTime)}</Text>
+            <Text style={[styles.textwithSymbol, { fontWeight: "800" }]}>
+              {formatTime(totalTime)}
+            </Text>
           </View>
           <View style={styles.stopWatchSubCont}>
             <View style={styles.timeWithIcon}>
@@ -568,7 +665,7 @@ const StopWatch = ({ navigation }) => {
 
               <Text style={styles.textwithSymbol}>Distance</Text>
             </View>
-            <Text style={styles.textwithSymbol}>
+            <Text style={[styles.textwithSymbol, { fontWeight: "800" }]}>
               {`${(distance / 1000).toFixed(2)} KM`}
             </Text>
           </View>
@@ -578,12 +675,140 @@ const StopWatch = ({ navigation }) => {
           </View> */}
           <View style={styles.stopWatchSubCont}>
             <Text style={styles.textwithSymbol}>Current Speed</Text>
-            <Text style={styles.textwithSymbol}>{getCurrentPace()}</Text>
+            <Text style={[styles.textwithSymbol, { fontWeight: "800" }]}>
+              {getCurrentPace()}
+            </Text>
           </View>
           <View style={styles.stopWatchSubCont}>
             <Text style={styles.textwithSymbol}>Average Speed</Text>
-            <Text style={styles.textwithSymbol}>{getAveragePace()}</Text>
+            <Text style={[styles.textwithSymbol, { fontWeight: "800" }]}>
+              {getAveragePace()}
+            </Text>
           </View>
+          {activityState?.activity?.workout?.steps?.length > 0 && (
+            // <ScrollView
+            //   contentContainerStyle={{ marginTop: 32, maxHeight: 200 }}
+            // >
+            //   <View>
+
+            //   </View>
+            // </ScrollView>
+            <View style={{ marginTop: 32, marginBottom: 80, flex: 1 }}>
+              <Text style={{ marginBottom: 16, fontSize: 16 }}>
+                {activityState?.activity?.workout?.name}
+              </Text>
+              <FlatList
+                scrollEnabled
+                data={workoutData}
+                keyExtractor={(item, index) => index}
+                renderItem={({ item, index }) => {
+                  {
+                    /* {" "}
+                  <Text style={{ marginBottom: 16 }}>Workout </Text>
+                  {activityState?.activity?.workout?.warm_up > 0 && (
+                    <View style={styles.stopWatchSubCont}>
+                      <Text style={styles.textwithSymbol}>Warm Up</Text>
+                      <Text style={styles.textwithSymbol}>
+                        {activityState?.activity?.workout?.warm_up / 60} Min
+                      </Text>
+                    </View>
+                  )} */
+                  }
+                  {
+                    /* {[
+              ...activityState?.activity?.workout?.steps,
+              ...activityState?.activity?.workout?.steps,
+              ...activityState?.activity?.workout?.steps,
+              ...activityState?.activity?.workout?.steps,
+              ...activityState?.activity?.workout?.steps,
+              ...activityState?.activity?.workout?.steps,
+            ]?.map((step) => ( */
+                  }
+
+                  return (
+                    <View
+                      style={[
+                        styles.stopWatchSubCont,
+                        elapsedTime[index] && styles.stopWatchSubContSelected,
+                      ]}
+                    >
+                      <Text style={styles.textwithSymbol}>
+                        {item?.step_name}{" "}
+                        <Text style={{ fontSize: 12 }}>{item?.pace}</Text>
+                      </Text>
+                      <Text
+                        style={[styles.textwithSymbol, { fontWeight: "800" }]}
+                      >
+                        {item?.duration
+                          ? `${item?.duration / 60} Min`
+                          : `${(item?.distance / 1000)?.toFixed(2)} KM`}
+
+                        {elapsedTime[index] > 0 &&
+                          item.duration &&
+                          (item?.duration - elapsedTime[index] / 1000) / 60 >
+                            0 && (
+                            <Text
+                              style={{
+                                fontWeight: "400",
+                                fontSize: 14,
+                              }}
+                            >
+                              {"    "}
+                              {`${Math.floor(
+                                (item?.duration - elapsedTime[index] / 1000) /
+                                  60
+                              )}:${Math.floor(
+                                (item?.duration - elapsedTime[index] / 1000) %
+                                  60
+                              )} Min Left`}
+                            </Text>
+                          )}
+
+                        {routeTracker[index]?.length > 0 &&
+                          item?.distance &&
+                          item?.distance -
+                            calculateDistance(routeTracker[index]) >
+                            0 && (
+                            <Text
+                              style={{
+                                fontWeight: "400",
+                                fontSize: 14,
+                              }}
+                            >
+                              {"    "}
+                              {`${(
+                                (item?.distance -
+                                  calculateDistance(routeTracker[index])) /
+                                1000
+                              )?.toFixed(2)} KM Left`}
+                            </Text>
+                          )}
+
+                        {/* {elapsedTime[index] / 60 > item?.duration &&
+                          `${(
+                            (item?.duration - elapsedTime[index]) /
+                            60
+                          )?.toFixed(2)} Min Left`} */}
+                      </Text>
+                    </View>
+                  );
+                  {
+                    /* ))} */
+                  }
+                  {
+                    /* {activityState?.activity?.workout?.cool_down > 0 && (
+                    <View style={styles.stopWatchSubCont}>
+                      <Text style={styles.textwithSymbol}>Cool Down</Text>
+                      <Text style={styles.textwithSymbol}>
+                        {activityState?.activity?.workout?.cool_down / 60} Min
+                      </Text>
+                    </View>
+                  )} */
+                  }
+                }}
+              ></FlatList>
+            </View>
+          )}
         </View>
 
         <View
@@ -806,6 +1031,8 @@ const styles = StyleSheet.create({
   },
   stopWatchSubCont: {
     backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#FFF",
     width: "100%",
     // height: 48,
     paddingVertical: 12,
@@ -815,6 +1042,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  stopWatchSubContSelected: {
+    backgroundColor: "#0064AD1A",
+    borderColor: "#0064AD66",
   },
   textwithSymbol: {
     color: "#666",

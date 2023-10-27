@@ -32,7 +32,7 @@ const Leaderboard = ({ navigation }) => {
       } else {
         navigation.reset({
           index: 0,
-          routes: [{ name: "welcome" }],
+          routes: [{ name: "marathons" }],
         });
       }
     };

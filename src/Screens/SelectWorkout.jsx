@@ -57,7 +57,7 @@ const SelectWorkout = ({ navigation }) => {
           </View>
         </TouchableOpacity>
       </View>
-      {workouts.map((workout) => (
+      {/* {workouts.map((workout) => (
         <View style={styles.activityContanier}>
           <TouchableOpacity
             style={{
@@ -77,7 +77,35 @@ const SelectWorkout = ({ navigation }) => {
             </View>
           </TouchableOpacity>
         </View>
-      ))}
+      ))} */}
+      <FlatList
+        data={workouts}
+        renderItem={({ item }) => (
+          <View style={styles.activityContanier}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={{
+                ...styles.activityButton,
+                ...(activityState.activity?.workout?.id === item.id && {
+                  backgroundColor: "#0064AD1A",
+                  borderColor: "#0064AD66",
+                }),
+              }}
+              onPress={() => {
+                console.log(item);
+                dispatch(
+                  setActivity({ ...activityState.activity, workout: item })
+                );
+                navigation.navigate("activity");
+              }}
+            >
+              <View style={styles.activityIcon}>
+                <Text style={styles.textwithSymbol}>{item.name}</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+      ></FlatList>
     </View>
   );
 };

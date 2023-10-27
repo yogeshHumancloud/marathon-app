@@ -79,9 +79,9 @@ const Main = ({ navigation }) => {
             );
           },
 
-          tabBarStyle: {
-            height: 64,
-          },
+          // tabBarStyle: {
+          //   height: 64,
+          // },
           tabBarIcon: ({ focused, color, size }) => {
             return null;
           },
@@ -150,7 +150,7 @@ const Main = ({ navigation }) => {
           tabBarStyle: {
             display: "none",
             tabBarStyle: {
-              height: 64,
+              height: 0,
             },
           },
         }}
@@ -163,7 +163,7 @@ const Main = ({ navigation }) => {
           tabBarStyle: {
             display: "none",
             tabBarStyle: {
-              height: 64,
+              height: 0,
             },
           },
         }}

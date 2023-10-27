@@ -33,7 +33,7 @@ const Results = () => {
       } else {
         navigation.reset({
           index: 0,
-          routes: [{ name: "welcome" }],
+          routes: [{ name: "marathons" }],
         });
       }
     };

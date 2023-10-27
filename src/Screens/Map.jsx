@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -86,7 +88,7 @@ const Map = ({ navigation }) => {
       } else {
         navigation.reset({
           index: 0,
-          routes: [{ name: "welcome" }],
+          routes: [{ name: "marathons" }],
         });
       }
     };
@@ -102,31 +104,31 @@ const Map = ({ navigation }) => {
     // };
   }, []);
 
-  useEffect(() => {
-    let sendUpdatedLocationInterval;
-    if (
-      selectedMarathon.marathon?.selectedType?.text?.toLowerCase() === "runner"
-    ) {
-      sendUpdatedLocationInterval = setInterval(() => {
-        socket.emit("updateRunnerLocation", {
-          user: user.user.user.id,
-          marathon: selectedMarathon.marathon.id,
-          currentLocation,
-        });
-      }, 10000);
-    } else {
-      socket.on(
-        `${user.user.user.id}-${selectedMarathon.marathon.id}`,
-        (message) => {
-          console.log(message);
-        }
-      );
-    }
+  // useEffect(() => {
+  //   let sendUpdatedLocationInterval;
+  //   if (
+  //     selectedMarathon.marathon?.selectedType?.text?.toLowerCase() === "runner"
+  //   ) {
+  //     sendUpdatedLocationInterval = setInterval(() => {
+  //       socket.emit("updateRunnerLocation", {
+  //         user: user.user.user.id,
+  //         marathon: selectedMarathon.marathon.id,
+  //         currentLocation,
+  //       });
+  //     }, 10000);
+  //   } else {
+  //     socket.on(
+  //       `${user.user.user.id}-${selectedMarathon.marathon.id}`,
+  //       (message) => {
+  //         console.log(message);
+  //       }
+  //     );
+  //   }
 
-    return () => {
-      clearInterval(sendUpdatedLocationInterval);
-    };
-  }, [selectedMarathon, currentLocation]);
+  //   return () => {
+  //     clearInterval(sendUpdatedLocationInterval);
+  //   };
+  // }, [selectedMarathon, currentLocation]);
 
   useEffect(() => {
     const fetchBibs = async () => {
@@ -143,7 +145,7 @@ const Map = ({ navigation }) => {
       } else {
         navigation.reset({
           index: 0,
-          routes: [{ name: "welcome" }],
+          routes: [{ name: "marathons" }],
         });
       }
     };
@@ -205,161 +207,162 @@ const Map = ({ navigation }) => {
   }, [route, loading]);
 
   return (
-    <View style={styles.cont}>
-      {/* <Button
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.cont}>
+        {/* <Button
         label={"loguot"}
         onPress={() => dispatch(deleteUser())}
         width={50}
       /> */}
-      <View style={styles.mainCont}>
-        <Ionicons name="search" size={24} color="#666666" />
-        <TextInput
-          onFocus={() => {
-            setIsDropdownOpen(true);
-          }}
-          onBlur={() => {
-            setIsDropdownOpen(false);
-          }}
-          value={searchValue}
-          onChangeText={setSearchValue}
-          style={{ flex: 1, marginLeft: 10, fontSize: 16 }}
-          placeholder="Search by name or BIB No."
-          placeholderTextColor="#999999"
-          cursorColor="#999999"
-        />
-      </View>
-
-      <View style={styles.cardTitleCont}>
-        {categories.map((cate, index) => (
-          <TouchableOpacity
-            key={index}
-            activeOpacity={0.9}
-            onPress={() => {
-              setSelectedCategory(cate);
+        <View style={styles.mainCont}>
+          <Ionicons name="search" size={24} color="#666666" />
+          <TextInput
+            onFocus={() => {
+              setIsDropdownOpen(true);
             }}
-            style={[
-              styles.cardTitleBUtton,
-              {
-                backgroundColor:
-                  selectedCategory?.title === cate.title ? "#FF92301A" : "#fff",
-                borderColor:
-                  selectedCategory?.title === cate.title
-                    ? "#FF9230"
-                    : "#666666",
-              },
-            ]}
-          >
-            <Text
+            blurOnSubmit
+            clearTextOnFocus
+            onBlur={() => {
+              setIsDropdownOpen(false);
+            }}
+            value={searchValue}
+            onChangeText={setSearchValue}
+            style={{ flex: 1, marginLeft: 10, fontSize: 16 }}
+            placeholder="Search by name or BIB No."
+            placeholderTextColor="#999999"
+            cursorColor="#999999"
+          />
+        </View>
+
+        <View style={styles.cardTitleCont}>
+          {categories.map((cate, index) => (
+            <TouchableOpacity
+              key={index}
+              activeOpacity={0.9}
+              onPress={() => {
+                setSelectedCategory(cate);
+              }}
               style={[
-                styles.cardTitle,
+                styles.cardTitleBUtton,
                 {
-                  color:
+                  backgroundColor:
+                    selectedCategory?.title === cate.title
+                      ? "#FF92301A"
+                      : "#fff",
+                  borderColor:
                     selectedCategory?.title === cate.title
                       ? "#FF9230"
                       : "#666666",
                 },
               ]}
             >
-              {cate.title}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      <View style={{ marginTop: 24, flex: 1, overflow: "hidden" }}>
-        {/* {loading && <Text>Loading...</Text>} */}
-        <MapView
-          mapType="none"
-          provider={PROVIDER_DEFAULT}
-          rotateEnabled={false}
-          style={{ height: "110%" }}
-          initialRegion={{
-            latitude: 18.174495,
-            longitude: 74.614503,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-          region={{
-            latitude: 18.174495,
-            longitude: 74.614503,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-          mapPadding={{
-            top: 0,
-            right: 0,
-            bottom: -100,
-            left: 0,
-          }}
-        >
-          <UrlTile
-            urlTemplate="https://tile.openstreetmap.de/{z}/{x}/{y}.png"
-            // urlTemplate="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-            zIndex={-1}
-          />
-
-          <Polyline
-            ref={polylineref}
-            coordinates={
-              selectedCategory.routes?.points
-                ? selectedCategory.routes?.points?.map((ev) => ({
-                    latitude: ev[0],
-                    longitude: ev[1],
-                  }))
-                : []
-            }
-            strokeColor={"#FF0000"}
-            strokeWidth={3}
-          />
-          {currentLocation.latitude && (
-            <Marker.Animated
-              ref={markerRef}
-              // image={ImagesSource.Maps.marker}
-              title="Current Location"
-              coordinate={currentLocation}
-            >
-              <Image
-                source={ImagesSource.Maps.marker}
-                width={20}
-                height={20}
-                style={{ width: 60, height: 60 }}
-              />
-            </Marker.Animated>
-          )}
-        </MapView>
-        {loading && (
-          <View style={styles.activityIncCont}>
-            <ActivityIndicator size="large" color="#000" />
-          </View>
-        )}
-      </View>
-      <View
-        style={[
-          styles.activCont,
-          {
-            display: isDropdownOpen ? "flex" : "none",
-          },
-        ]}
-      >
-        {searchLoading ? (
-          <ActivityIndicator size={"small"}></ActivityIndicator>
-        ) : searchResults.length === 0 ? (
-          <Text style={styles.activityText}>No search results found</Text>
-        ) : (
-          [
-            ...searchResults,
-            ...searchResults,
-            ...searchResults,
-            ...searchResults,
-          ].map((result, index) => (
-            <TouchableOpacity key={index} style={styles.activityBUtton}>
-              <Text>
-                {result.bib_id} - {result.name}
+              <Text
+                style={[
+                  styles.cardTitle,
+                  {
+                    color:
+                      selectedCategory?.title === cate.title
+                        ? "#FF9230"
+                        : "#666666",
+                  },
+                ]}
+              >
+                {cate.title}
               </Text>
             </TouchableOpacity>
-          ))
-        )}
+          ))}
+        </View>
+        <View style={{ marginTop: 24, flex: 1, overflow: "hidden" }}>
+          {/* {loading && <Text>Loading...</Text>} */}
+          <MapView
+            mapType="none"
+            provider={PROVIDER_DEFAULT}
+            rotateEnabled={false}
+            style={{ height: "110%" }}
+            initialRegion={{
+              latitude: 18.174495,
+              longitude: 74.614503,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+            region={{
+              latitude: 18.174495,
+              longitude: 74.614503,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+            mapPadding={{
+              top: 0,
+              right: 0,
+              bottom: -100,
+              left: 0,
+            }}
+          >
+            <UrlTile
+              urlTemplate="https://tile.openstreetmap.de/{z}/{x}/{y}.png"
+              // urlTemplate="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              zIndex={-1}
+            />
+
+            <Polyline
+              ref={polylineref}
+              coordinates={
+                selectedCategory.routes?.points
+                  ? selectedCategory.routes?.points?.map((ev) => ({
+                      latitude: ev[0],
+                      longitude: ev[1],
+                    }))
+                  : []
+              }
+              strokeColor={"#FF0000"}
+              strokeWidth={3}
+            />
+            {currentLocation.latitude && (
+              <Marker.Animated
+                ref={markerRef}
+                // image={ImagesSource.Maps.marker}
+                title="Current Location"
+                coordinate={currentLocation}
+              >
+                <Image
+                  source={ImagesSource.Maps.marker}
+                  width={20}
+                  height={20}
+                  style={{ width: 60, height: 60 }}
+                />
+              </Marker.Animated>
+            )}
+          </MapView>
+          {loading && (
+            <View style={styles.activityIncCont}>
+              <ActivityIndicator size="large" color="#000" />
+            </View>
+          )}
+        </View>
+        <View
+          style={[
+            styles.activCont,
+            {
+              display: isDropdownOpen ? "flex" : "none",
+            },
+          ]}
+        >
+          {searchLoading ? (
+            <ActivityIndicator size={"small"}></ActivityIndicator>
+          ) : searchResults.length === 0 ? (
+            <Text style={styles.activityText}>No search results found</Text>
+          ) : (
+            searchResults.map((result, index) => (
+              <TouchableOpacity key={index} style={styles.activityBUtton}>
+                <Text>
+                  {result.bib_id} - {result.name}
+                </Text>
+              </TouchableOpacity>
+            ))
+          )}
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
