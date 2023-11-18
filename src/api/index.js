@@ -153,6 +153,18 @@ export const getEventBibs = async (body) => {
     if (body.limit) {
       queryParams.push(`limit=${encodeURIComponent(body.limit)}`);
     }
+
+    if (body.race_id) {
+      queryParams.push(`race_id=${encodeURIComponent(body.race_id)}`);
+    }
+
+    if (body.ct_id) {
+      queryParams.push(`event_id=${encodeURIComponent(body.ct_id)}`);
+    }
+
+    if (body.interval_id) {
+      queryParams.push(`interval_id=${encodeURIComponent(body.interval_id)}`);
+    }
     try {
       const response = await client.get(
         `/v1/events/${body.event_id}/getBibs${

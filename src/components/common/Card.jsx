@@ -33,7 +33,7 @@ const Card = ({ bib, isResult = false }) => {
       />
       <View style={{ flex: 1 }}>
         <Text style={{ color: "#333", fontSize: 16, fontWeight: "700" }}>
-          {bib.name}
+          {bib.results_first_name} {bib.results_last_name}
         </Text>
         <View
           style={{
@@ -43,7 +43,7 @@ const Card = ({ bib, isResult = false }) => {
           }}
         >
           <Text style={{ color: "#999", fontSize: 14 }}>Bib No:</Text>
-          <Text style={{ color: "#333", fontSize: 14 }}>{bib.bib_id}</Text>
+          <Text style={{ color: "#333", fontSize: 14 }}>{bib.results_bib}</Text>
         </View>
         <View
           style={{
@@ -54,7 +54,9 @@ const Card = ({ bib, isResult = false }) => {
           <Text style={{ color: "#999", fontSize: 14 }}>
             {isResult ? "Rank:" : "Current Position:"}
           </Text>
-          <Text style={{ color: "#333", fontSize: 14 }}>{bib.position}</Text>
+          <Text style={{ color: "#333", fontSize: 14 }}>
+            {bib.results_rank}
+          </Text>
         </View>
         <View
           style={{
@@ -66,7 +68,7 @@ const Card = ({ bib, isResult = false }) => {
             {isResult ? "Award Time:" : "Start Time:"}
           </Text>
           <Text style={{ color: "#333", fontSize: 14 }}>
-            {isResult ? bib.award_time : bib.start_time}
+            {isResult ? bib.results_time : bib.results_time}
           </Text>
         </View>
       </View>

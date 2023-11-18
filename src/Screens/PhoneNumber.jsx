@@ -62,7 +62,7 @@ const PhoneNumber = ({ navigation }) => {
       <Text style={styles.title}>Enter Phone Number</Text>
 
       <Text style={styles.subtext}>
-        Please enter your valid phone number. We will send you a 4-digit code to
+        Please enter your valid phone number. We will send you a 6-digit code to
         verify your account .
       </Text>
       <View style={styles.container}>

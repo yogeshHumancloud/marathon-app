@@ -5,18 +5,46 @@ import {
   TextInput,
   ScrollView,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Card from "../components/common/Card";
 import { useSelector } from "react-redux";
-import { getEventBibs } from "../api";
+import { getEventBibs, getEventData } from "../api";
 
 const Results = () => {
   const [results, setResults] = useState([]);
   const [searchValue, setSearchValue] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState({});
   const [loading, setLoading] = useState(false);
   const selectedMarathon = useSelector((store) => store.marathon);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (selectedMarathon.marathon?.id) {
+        const data = await getEventData({
+          event_id: selectedMarathon.marathon?.id,
+        });
+
+        setCategories(data.races);
+        setSelectedCategory(data.races[0]);
+
+        //   const data = await axios.get(
+        //     `https://api.chronotrack.com:443/api/event/${selectedMarathon?.marathon?.ct_id}/race?format=json&client_id=727dae7f&user_id=test-api%40chronotrack.com&user_pass=cd77558dc610ca8dc956b0a2b2cec47c26e75e8b&page=1&size=50&include_not_wants_results=true`
+        //   );
+        //   setCategories(data.data.event_race);
+        //   setSelectedCategory(data.data.event_race[0]);
+        // } else {
+        //   navigation.reset({
+        //     index: 0,
+        //     routes: [{ name: "marathons" }],
+        //   });
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchBibs = async () => {
@@ -27,7 +55,10 @@ const Results = () => {
           query: searchValue !== "" ? searchValue : undefined,
           sortBy: "position",
           type: "result",
+          race_id: selectedCategory.race_id,
+          ct_id: selectedMarathon?.marathon?.ct_id,
         });
+
         setResults(data.data.results);
         setLoading(false);
       } else {
@@ -38,7 +69,7 @@ const Results = () => {
       }
     };
     fetchBibs();
-  }, [searchValue]);
+  }, [searchValue, selectedCategory, selectedMarathon]);
 
   return (
     <View style={styles.cont}>
@@ -53,6 +84,46 @@ const Results = () => {
           cursorColor="#999999"
         />
       </View>
+
+      <View style={styles.cardTitleCont}>
+        {categories.map((cate, index) => (
+          <TouchableOpacity
+            key={index}
+            activeOpacity={0.9}
+            onPress={() => {
+              setSelectedCategory(cate);
+            }}
+            style={[
+              styles.cardTitleBUtton,
+              {
+                backgroundColor:
+                  selectedCategory?.race_name === cate.race_name
+                    ? "#FF92301A"
+                    : "#fff",
+                borderColor:
+                  selectedCategory?.race_name === cate.race_name
+                    ? "#FF9230"
+                    : "#666666",
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.cardTitle,
+                {
+                  color:
+                    selectedCategory?.race_name === cate.race_name
+                      ? "#FF9230"
+                      : "#666666",
+                },
+              ]}
+            >
+              {cate.race_name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       {results.status !== "pending" ? (
         <ScrollView style={{ marginTop: 24 }}>
           {loading ? (
@@ -119,5 +190,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 8,
     textAlign: "center",
+  },
+  cardTitleCont: {
+    // marginTop: 0,
+    marginTop: 16,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  cardTitleBUtton: {
+    alignSelf: "flex-start",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderRadius: 24,
   },
 });

@@ -9,7 +9,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { createRef, useEffect, useRef, useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MapView, {
   Marker,
@@ -32,12 +32,16 @@ const Map = ({ navigation }) => {
 
   const polylineref = useRef(null);
   const markerRef = useRef(null);
+  const markerRefs = useRef([]);
   const dispatch = useDispatch();
   const [categories, setCategories] = useState([]);
   const [route, setRoute] = useState([]);
   const [currentLocation, setCurrentLocation] = useState({});
   const [searchResults, setSearchResults] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [intervals, setIntervals] = useState([]);
+  const [selectedInterval, setSelectedInterval] = useState({});
+  const [allIntervals, setAllIntervals] = useState([]);
 
   const [selectedCategory, setSelectedCategory] = useState({});
   const [searchValue, setSearchValue] = useState("");
@@ -47,34 +51,40 @@ const Map = ({ navigation }) => {
   const fetchRoute = async (points) => {
     setLoading(true);
 
-    const coordinates = points?.map((co) => co.reverse().join(","));
+    const coordinates = points?.map((co) => ({
+      latitude: co[0],
+      longitude: co[1],
+    }));
+    setRoute(coordinates);
+    setLoading(false);
+    // const coordinates = points?.map((co) => co.reverse().join(","));
 
-    try {
-      const url = `https://routing.openstreetmap.de/routed-foot/route/v1/driving/${coordinates.join(
-        ";"
-      )}?overview=full&geometries=polyline&steps=true`;
+    // try {
+    //   const url = `https://routing.openstreetmap.de/routed-foot/route/v1/driving/${coordinates.join(
+    //     ";"
+    //   )}?overview=full&geometries=polyline&steps=true`;
 
-      const res = await axios.get(url);
+    //   const res = await axios.get(url);
 
-      res.data.routes.map((route) => {
-        route.legs.map((leg) => {
-          leg.steps.map((step) => {
-            step.intersections.map((inter) => {
-              setRoute((prevState) => [
-                ...prevState,
-                { latitude: inter.location[1], longitude: inter.location[0] },
-              ]);
-            });
-          });
-        });
-      });
-      setLoading(false);
-    } catch (e) {
-      console.log(e);
-    }
-    //     }
-    //   })
-    // );
+    //   res.data.routes.map((route) => {
+    //     route.legs.map((leg) => {
+    //       leg.steps.map((step) => {
+    //         step.intersections.map((inter) => {
+    //           setRoute((prevState) => [
+    //             ...prevState,
+    //             { latitude: inter.location[1], longitude: inter.location[0] },
+    //           ]);
+    //         });
+    //       });
+    //     });
+    //   });
+    //   setLoading(false);
+    // } catch (e) {
+    //   console.log(e);
+    // }
+    // //     }
+    // //   })
+    // // );
   };
 
   useEffect(() => {
@@ -85,6 +95,12 @@ const Map = ({ navigation }) => {
         });
         setCategories(data.event.categories);
         setSelectedCategory(data.event.categories[0]);
+        setAllIntervals(data.intervals);
+        setIntervals(
+          data.intervals?.filter(
+            (intse) => intse.race_id === data.categories[0]?.race_id
+          )
+        );
       } else {
         navigation.reset({
           index: 0,
@@ -138,8 +154,13 @@ const Map = ({ navigation }) => {
           event_id: selectedMarathon.marathon?.id,
           query: searchValue !== "" ? searchValue : undefined,
           sortBy: "position",
+
+          ct_id: selectedMarathon?.marathon?.ct_id,
+          race_id: selectedCategory?.race_id
+            ? selectedCategory?.race_id
+            : "4332",
         });
-        console.log(data.data.results?.slice(0, 5));
+
         setSearchResults(data.data.results?.slice(0, 5));
         setSearchLoading(false);
       } else {
@@ -180,12 +201,22 @@ const Map = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
+    setSelectedInterval(intervals[0]);
+  }, [intervals]);
+
+  useEffect(() => {
     if (markerRef.current && currentLocation.latitude) {
       markerRef.current.animateMarkerToCoordinate(currentLocation, 200);
     }
   }, [currentLocation]);
 
   useEffect(() => {
+    setIntervals(
+      allIntervals?.filter(
+        (intse) => intse.race_id === selectedCategory?.race_id
+      )
+    );
+
     if (selectedCategory.route?.[0].points?.length > 0) {
       setRoute([]);
       fetchRoute(selectedCategory.route?.[0].points);
@@ -206,14 +237,24 @@ const Map = ({ navigation }) => {
     }
   }, [route, loading]);
 
+  useEffect(() => {
+    markerRefs.current = Array(selectedCategory?.intervals?.length)
+      .fill()
+      .map((_, index) => markerRefs.current[index] || createRef());
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    console.log(markerRefs?.current?.[0]?.current?.showCallout());
+  }, [markerRefs]);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.cont}>
         {/* <Button
-        label={"loguot"}
-        onPress={() => dispatch(deleteUser())}
-        width={50}
-      /> */}
+          label={"loguot"}
+          onPress={() => dispatch(deleteUser())}
+          width={50}
+        /> */}
         <View style={styles.mainCont}>
           <Ionicons name="search" size={24} color="#666666" />
           <TextInput
@@ -226,7 +267,10 @@ const Map = ({ navigation }) => {
               setIsDropdownOpen(false);
             }}
             value={searchValue}
-            onChangeText={setSearchValue}
+            onChangeText={(e) => {
+              setIsDropdownOpen(true);
+              setSearchValue(e);
+            }}
             style={{ flex: 1, marginLeft: 10, fontSize: 16 }}
             placeholder="Search by name or BIB No."
             placeholderTextColor="#999999"
@@ -315,7 +359,7 @@ const Map = ({ navigation }) => {
                   : []
               }
               strokeColor={"#FF0000"}
-              strokeWidth={3}
+              strokeWidth={5}
             />
             {currentLocation.latitude && (
               <Marker.Animated
@@ -332,6 +376,56 @@ const Map = ({ navigation }) => {
                 />
               </Marker.Animated>
             )}
+            {selectedCategory?.intervals?.map((interval, index) => (
+              <Marker.Animated
+                ref={markerRefs.current[index]}
+                title={`T${index + 1}`}
+                coordinate={{ latitude: interval[0], longitude: interval[1] }}
+                centerOffset={[0, 0]}
+              >
+                <Image
+                  source={ImagesSource.Maps[`t${index + 1}`]}
+                  width={30}
+                  height={30}
+                  style={{ width: 30, height: 30 }}
+                />
+              </Marker.Animated>
+            ))}
+            {selectedCategory?.route?.[0]?.start_point?.length > 0 &&
+              selectedCategory?.route?.[0]?.end_point?.length > 0 && (
+                <>
+                  <Marker.Animated
+                    title="Start"
+                    coordinate={{
+                      latitude: selectedCategory.route[0]?.start_point[0],
+                      longitude: selectedCategory.route[0]?.start_point[1],
+                    }}
+                    centerOffset={[10, 10]}
+                  >
+                    <Image
+                      source={ImagesSource.Maps.start}
+                      width={100}
+                      height={30}
+                      style={{ width: 40, height: 20 }}
+                    />
+                  </Marker.Animated>
+                  <Marker.Animated
+                    title={`Finish`}
+                    coordinate={{
+                      latitude: selectedCategory.route[0]?.end_point[0],
+                      longitude: selectedCategory.route[0]?.end_point[1],
+                    }}
+                    centerOffset={[10, 10]}
+                  >
+                    <Image
+                      source={ImagesSource.Maps.finish}
+                      width={200}
+                      height={20}
+                      style={{ width: 50, height: 25 }}
+                    />
+                  </Marker.Animated>
+                </>
+              )}
           </MapView>
           {loading && (
             <View style={styles.activityIncCont}>
@@ -353,9 +447,29 @@ const Map = ({ navigation }) => {
             <Text style={styles.activityText}>No search results found</Text>
           ) : (
             searchResults.map((result, index) => (
-              <TouchableOpacity key={index} style={styles.activityBUtton}>
+              <TouchableOpacity
+                key={index}
+                style={styles.activityBUtton}
+                onPress={() => {
+                  setIsDropdownOpen(false);
+
+                  const intervals = allIntervals.filter(
+                    (interv) => interv.race_id === selectedCategory?.race_id
+                  );
+
+                  const index = intervals.findIndex(
+                    (inter) => inter.interval_id === result.results_interval_id
+                  );
+
+                  markerRefs.current[index]?.current.showCallout();
+
+                  setSearchValue(result.results_bib);
+                  Keyboard.dismiss();
+                }}
+              >
                 <Text>
-                  {result.bib_id} - {result.name}
+                  {result.results_bib} - {result.results_first_name}{" "}
+                  {result.results_last_name}
                 </Text>
               </TouchableOpacity>
             ))
@@ -387,6 +501,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   cardTitleCont: {
+    // marginTop: 0,
     marginTop: 16,
     flexDirection: "row",
     flexWrap: "wrap",

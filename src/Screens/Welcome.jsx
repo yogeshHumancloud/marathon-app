@@ -42,7 +42,7 @@ const Welcome = ({ navigation }) => {
   const handleNext = () => {
     if (selectedMarathon.id) {
       dispatch(setMarathon(selectedMarathon));
-      navigation.navigate("choosetype");
+      navigation.navigate("dashboard");
     } else {
       Toast.show({
         type: "error",

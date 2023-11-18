@@ -118,7 +118,7 @@ const MarathonDetails = ({ navigation, route }) => {
             dispatch(setMarathon(marathon));
 
             // Linking.openURL(marathon.registration_link);
-            navigation.navigate("choosetype");
+            navigation.navigate("dashboard");
             // navigation.getParent()?.setOptions({
             //   tabBarStyle: {
             //     height: 0,

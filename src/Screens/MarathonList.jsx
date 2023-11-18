@@ -23,6 +23,7 @@ import { LOCATION_TRACKING } from "../constants";
 
 const MarathonList = ({ navigation }) => {
   const [events, setEvents] = useState([]);
+  const marathon = useSelector((store) => store.marathon);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -42,6 +43,14 @@ const MarathonList = ({ navigation }) => {
         navigation.navigate(`training`);
       }
     };
+
+    if (marathon.marathon?.id) {
+      if (marathon?.marathon?.selectedType?.id) {
+        navigation.navigate(`dashboard`);
+      } else {
+        navigation.navigate(`dashboard`);
+      }
+    }
     fetchIsRunning();
   }, []);
 
