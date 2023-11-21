@@ -140,7 +140,7 @@ const Main = ({ navigation }) => {
     <MainStack.Screen name="dashboard" component={DashboardNavigator} /> */}
       <MainStack.Screen name="marathons" component={MarathonNavigator} />
       <MainStack.Screen name="training" component={ActivityNavigator} />
-      <MainStack.Screen
+      {/* <MainStack.Screen
         name="choosetype"
         component={ChooseUser}
         options={{
@@ -154,7 +154,7 @@ const Main = ({ navigation }) => {
             },
           },
         }}
-      />
+      /> */}
       <MainStack.Screen
         name="dashboard"
         component={DashboardNavigator}

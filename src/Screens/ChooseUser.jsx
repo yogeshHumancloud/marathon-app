@@ -69,7 +69,7 @@ const ChooseUser = ({ navigation }) => {
         <AntDesign name="arrowleft" size={24} color="black" />
       </TouchableOpacity>
       <Text style={styles.title1}>Welcome to the</Text>
-      <Text style={styles.titleNext2}>Baramathi</Text>
+      <Text style={styles.titleNext2}>Baramati</Text>
       <Text style={styles.titleNext2}>
         Power Marathon <Text style={styles.titleNext3}>2023</Text>
       </Text>

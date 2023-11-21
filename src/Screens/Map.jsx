@@ -29,6 +29,7 @@ import socket from "../api/socket";
 const Map = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
+  const map = useRef(null);
 
   const polylineref = useRef(null);
   const markerRef = useRef(null);
@@ -218,6 +219,14 @@ const Map = ({ navigation }) => {
     );
 
     if (selectedCategory.route?.[0].points?.length > 0) {
+      map?.current?.getCamera().then((cam) => {
+        cam.center = {
+          latitude: 18.179405,
+          longitude: 74.607698,
+        };
+        cam.zoom = 13;
+        map?.current?.animateCamera(cam);
+      });
       setRoute([]);
       fetchRoute(selectedCategory.route?.[0].points);
     }
@@ -243,9 +252,9 @@ const Map = ({ navigation }) => {
       .map((_, index) => markerRefs.current[index] || createRef());
   }, [selectedCategory]);
 
-  useEffect(() => {
-    console.log(markerRefs?.current?.[0]?.current?.showCallout());
-  }, [markerRefs]);
+  // useEffect(() => {
+  //   console.log(markerRefs?.current?.[0]?.current?.showCallout());
+  // }, [markerRefs]);
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -318,20 +327,22 @@ const Map = ({ navigation }) => {
         </View>
         <View style={{ marginTop: 24, flex: 1, overflow: "hidden" }}>
           {/* {loading && <Text>Loading...</Text>} */}
+
           <MapView
+            ref={map}
             mapType="none"
             provider={PROVIDER_DEFAULT}
             rotateEnabled={false}
             style={{ height: "110%" }}
             initialRegion={{
-              latitude: 18.174495,
-              longitude: 74.614503,
+              latitude: 18.179405,
+              longitude: 74.607698,
               latitudeDelta: 0.0922,
               longitudeDelta: 0.0421,
             }}
             region={{
-              latitude: 18.174495,
-              longitude: 74.614503,
+              latitude: 18.179405,
+              longitude: 74.607698,
               latitudeDelta: 0.0922,
               longitudeDelta: 0.0421,
             }}
@@ -358,7 +369,7 @@ const Map = ({ navigation }) => {
                     }))
                   : []
               }
-              strokeColor={"#FF0000"}
+              strokeColor={"#003c00"}
               strokeWidth={5}
             />
             {currentLocation.latitude && (
@@ -427,6 +438,34 @@ const Map = ({ navigation }) => {
                 </>
               )}
           </MapView>
+
+          <TouchableOpacity
+            style={{
+              position: "absolute",
+              right: 12,
+              bottom: 12,
+              backgroundColor: "#fff",
+              paddingHorizontal: 12,
+              paddingVertical: 4,
+              opacity: 0.8,
+              borderRadius: 4,
+            }}
+            onPress={() => {
+              if (map.current) {
+                map?.current?.getCamera().then((cam) => {
+                  cam.center = {
+                    latitude: 18.179405,
+                    longitude: 74.607698,
+                  };
+                  cam.zoom = 13;
+                  map?.current?.animateCamera(cam);
+                });
+              }
+            }}
+          >
+            <Text>Reset</Text>
+          </TouchableOpacity>
+
           {loading && (
             <View style={styles.activityIncCont}>
               <ActivityIndicator size="large" color="#000" />

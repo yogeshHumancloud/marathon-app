@@ -54,8 +54,8 @@ const Leaderboard = ({ navigation }) => {
           event_id: selectedMarathon.marathon?.id,
         });
 
-        setCategories(data.races);
-        setSelectedCategory(data.races[0]);
+        setCategories(data.event.categories);
+        setSelectedCategory(data.event.categories[0]);
         setAllIntervals(data.intervals);
         setIntervals(
           data.intervals?.filter(
@@ -174,11 +174,9 @@ const Leaderboard = ({ navigation }) => {
               styles.cardTitleBUtton,
               {
                 backgroundColor:
-                  selectedCategory?.race_name === cate.race_name
-                    ? "#FF92301A"
-                    : "#fff",
+                  selectedCategory?.title === cate.title ? "#FF92301A" : "#fff",
                 borderColor:
-                  selectedCategory?.race_name === cate.race_name
+                  selectedCategory?.title === cate.title
                     ? "#FF9230"
                     : "#666666",
               },
@@ -189,13 +187,13 @@ const Leaderboard = ({ navigation }) => {
                 styles.cardTitle,
                 {
                   color:
-                    selectedCategory?.race_name === cate.race_name
+                    selectedCategory?.title === cate.title
                       ? "#FF9230"
                       : "#666666",
                 },
               ]}
             >
-              {cate.race_name}
+              {cate.title}
             </Text>
           </TouchableOpacity>
         ))}

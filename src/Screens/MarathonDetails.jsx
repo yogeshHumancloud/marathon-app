@@ -108,7 +108,7 @@ const MarathonDetails = ({ navigation, route }) => {
             ? "Enter Marathon"
             : category === "past"
             ? "View Results"
-            : "Register"
+            : "More Details"
         }
         onPress={() => {
           if (category === "live") {

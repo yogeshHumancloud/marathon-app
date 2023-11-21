@@ -28,8 +28,8 @@ const Results = () => {
           event_id: selectedMarathon.marathon?.id,
         });
 
-        setCategories(data.races);
-        setSelectedCategory(data.races[0]);
+        setCategories(data.event.categories);
+        setSelectedCategory(data.event.categories[0]);
 
         //   const data = await axios.get(
         //     `https://api.chronotrack.com:443/api/event/${selectedMarathon?.marathon?.ct_id}/race?format=json&client_id=727dae7f&user_id=test-api%40chronotrack.com&user_pass=cd77558dc610ca8dc956b0a2b2cec47c26e75e8b&page=1&size=50&include_not_wants_results=true`
@@ -97,11 +97,9 @@ const Results = () => {
               styles.cardTitleBUtton,
               {
                 backgroundColor:
-                  selectedCategory?.race_name === cate.race_name
-                    ? "#FF92301A"
-                    : "#fff",
+                  selectedCategory?.title === cate.title ? "#FF92301A" : "#fff",
                 borderColor:
-                  selectedCategory?.race_name === cate.race_name
+                  selectedCategory?.title === cate.title
                     ? "#FF9230"
                     : "#666666",
               },
@@ -112,13 +110,13 @@ const Results = () => {
                 styles.cardTitle,
                 {
                   color:
-                    selectedCategory?.race_name === cate.race_name
+                    selectedCategory?.title === cate.title
                       ? "#FF9230"
                       : "#666666",
                 },
               ]}
             >
-              {cate.race_name}
+              {cate.title}
             </Text>
           </TouchableOpacity>
         ))}
